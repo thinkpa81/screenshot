@@ -5,6 +5,7 @@
 - **목표**: 수십~수백 개의 웹페이지 URL을 입력받아 전체 페이지 스크린샷을 자동으로 생성하는 웹 애플리케이션
 - **주요 기능**:
   - 여러 URL 일괄 입력 및 처리
+  - **🆕 자동 크롤링 모드** - 전체 웹사이트 자동 탐색
   - 전체 페이지(Full Page) 스크린샷 지원
   - 다양한 화면 크기 지원 (Desktop, Laptop, Tablet, Mobile)
   - PNG, JPEG, WebP 포맷 지원
@@ -17,36 +18,61 @@
 - **프로덕션**: (Cloudflare Pages 배포 후 추가 예정)
 
 ## 데이터 아키텍처
-- **스크린샷 API**: ScreenshotOne API (Demo 모드 - 실제 배포 시 API 키 필요)
+- **스크린샷 API**: Microlink API (무료, API 키 불필요, 월 50,000회)
+- **크롤링 API**: Microlink Links API (JavaScript 렌더링 지원)
 - **저장소**: Cloudflare R2 Bucket (`screenshot-storage`)
 - **데이터 흐름**:
-  1. 사용자가 URL 목록 입력
-  2. 프론트엔드에서 각 URL에 대해 `/api/screenshot` 호출
-  3. 백엔드에서 ScreenshotOne API 호출하여 스크린샷 생성
+  1. 사용자가 URL 입력 또는 자동 크롤링 선택
+  2. (자동 모드) 백엔드에서 사이트 전체 링크 추출
+  3. 각 URL에 대해 Microlink API 호출하여 스크린샷 생성
   4. 생성된 이미지를 R2 버킷에 저장
   5. 저장된 파일명 반환 및 프론트엔드에서 결과 표시
 
 ## 사용 방법
 
-### 1. 기본 사용
-1. 웹 애플리케이션 접속
+### 모드 1: 수동 입력 모드 (권장)
+대부분의 경우 이 방법이 가장 정확하고 빠릅니다.
+
+1. **크롤링 모드**: "수동 입력 (URL 목록)" 선택
 2. URL 목록 입력란에 스크린샷을 찍고 싶은 URL을 한 줄에 하나씩 입력
    ```
-   https://example.com
-   https://another-site.com
-   https://third-site.com
+   https://dankook-graduate.onrender.com/
+   https://dankook-graduate.onrender.com/subjects
+   https://dankook-graduate.onrender.com/requirements
+   https://dankook-graduate.onrender.com/courses
+   https://dankook-graduate.onrender.com/schedule
    ```
 3. 화면 크기, 이미지 포맷, 캡처 모드 선택
 4. "스크린샷 생성 시작" 버튼 클릭
 5. 진행 상태를 실시간으로 확인하며 대기
 6. 완료된 스크린샷을 개별적으로 다운로드
 
-### 2. 옵션 설명
+### 모드 2: 자동 크롤링 모드 (실험적)
+⚠️ **주의**: SPA(Single Page Application)나 JavaScript 기반 사이트는 자동 크롤링이 제한적일 수 있습니다.
+
+1. **크롤링 모드**: "자동 크롤링 (전체 사이트)" 선택
+2. 시작 URL만 입력 (예: `https://dankook-graduate.onrender.com/`)
+3. **크롤링 옵션** 설정:
+   - **최대 페이지 수**: 발견할 최대 페이지 개수 (기본: 20)
+   - **크롤링 깊이**: 링크를 따라갈 깊이 (기본: 2)
+4. 화면 크기, 이미지 포맷, 캡처 모드 선택
+5. "스크린샷 생성 시작" 버튼 클릭
+6. 시스템이 자동으로 사이트 내 링크를 찾아서 스크린샷 생성
+
+### 💡 SPA 사이트의 경우
+React, Vue, Angular 등으로 만들어진 SPA 사이트는 자동 크롤링이 어려울 수 있습니다. 이런 경우:
+1. 브라우저에서 사이트를 직접 탐색
+2. 주요 페이지의 URL을 복사하여 목록 작성
+3. **수동 입력 모드**를 사용하여 URL 목록 제공
+
+### 옵션 설명
 - **화면 너비**: Desktop(1920px), Laptop(1366px), Tablet(768px), Mobile(375px)
 - **이미지 포맷**: PNG(고품질), JPEG(작은 용량), WebP(최적화)
 - **캡처 모드**: 전체 페이지(스크롤 포함) 또는 첫 화면만
+- **최대 페이지 수**: 자동 크롤링 시 발견할 최대 페이지 개수 (1-100)
+- **크롤링 깊이**: 링크를 따라갈 깊이 (1-5, 깊을수록 더 많은 페이지 발견)
 
-### 3. 키보드 단축키
+### 키보드 단축키
 - `Ctrl + Enter`: 스크린샷 생성 시작
 
 ## 기술 스택
