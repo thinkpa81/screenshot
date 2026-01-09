@@ -21,9 +21,40 @@ async function analyzeSite() {
     const analyzeResult = document.getElementById('analyzeResult');
     const foundUrlList = document.getElementById('foundUrlList');
     const foundUrlCount = document.getElementById('foundUrlCount');
+    const analyzeBtn = document.querySelector('button[onclick="analyzeSite()"]');
+
+    // 버튼 비활성화
+    if (analyzeBtn) {
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>분석 중...';
+        analyzeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
 
     analyzeResult.classList.remove('hidden');
-    foundUrlList.innerHTML = '<div class="text-gray-500 text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>사이트를 분석하는 중...</div>';
+    
+    // 진행률 표시 추가
+    foundUrlList.innerHTML = `
+        <div class="text-center py-6">
+            <i class="fas fa-search fa-3x text-purple-500 mb-4 animate-pulse"></i>
+            <p class="text-gray-700 font-semibold mb-2">사이트를 분석하는 중...</p>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-3">
+                <div id="analyzeProgress" class="bg-purple-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="analyzeProgressText" class="text-sm text-gray-600 mt-2">0% 완료</p>
+        </div>
+    `;
+
+    // 진행률 애니메이션
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        if (progress < 90) {
+            progress += 10;
+            const progressBar = document.getElementById('analyzeProgress');
+            const progressText = document.getElementById('analyzeProgressText');
+            if (progressBar) progressBar.style.width = progress + '%';
+            if (progressText) progressText.textContent = progress + '% 완료';
+        }
+    }, 200);
 
     try {
         // 분석 API 호출
@@ -31,17 +62,37 @@ async function analyzeSite() {
             url: analyzeUrl
         });
 
+        // 진행률 100%로 설정
+        clearInterval(progressInterval);
+        const progressBar = document.getElementById('analyzeProgress');
+        const progressText = document.getElementById('analyzeProgressText');
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressText) progressText.textContent = '100% 완료';
+
+        // 잠깐 완료 메시지 표시
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         if (response.data.success) {
             foundUrlsCache = response.data.foundUrls;
             foundUrlCount.textContent = foundUrlsCache.length;
 
             // URL 목록 표시
             if (foundUrlsCache.length > 0) {
-                foundUrlList.innerHTML = foundUrlsCache.map((url, index) => `
-                    <div class="py-1 border-b border-gray-200 last:border-b-0 hover:bg-gray-100 px-2 rounded text-gray-700">
-                        ${index + 1}. ${url}
+                foundUrlList.innerHTML = `
+                    <div class="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p class="text-green-700 font-semibold flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            분석 완료! ${foundUrlsCache.length}개의 URL을 발견했습니다.
+                        </p>
                     </div>
-                `).join('');
+                    <div class="space-y-1">
+                        ${foundUrlsCache.map((url, index) => `
+                            <div class="py-2 px-3 border-b border-gray-200 last:border-b-0 hover:bg-gray-100 rounded text-gray-700 text-xs">
+                                <span class="font-semibold text-purple-600">${index + 1}.</span> ${url}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             } else {
                 foundUrlList.innerHTML = '<div class="text-yellow-600 text-center py-4"><i class="fas fa-exclamation-triangle mr-2"></i>발견된 URL이 없습니다.</div>';
             }
@@ -49,9 +100,23 @@ async function analyzeSite() {
             throw new Error(response.data.error || '분석 실패');
         }
     } catch (error) {
+        clearInterval(progressInterval);
         const errorMsg = error.response?.data?.error || error.message || '분석 오류';
-        foundUrlList.innerHTML = `<div class="text-red-600 text-center py-4"><i class="fas fa-times-circle mr-2"></i>${errorMsg}</div>`;
+        foundUrlList.innerHTML = `
+            <div class="text-red-600 text-center py-6">
+                <i class="fas fa-times-circle text-3xl mb-3"></i>
+                <p class="font-semibold mb-2">분석 실패</p>
+                <p class="text-sm">${errorMsg}</p>
+            </div>
+        `;
         console.error('사이트 분석 오류:', error);
+    } finally {
+        // 버튼 다시 활성화
+        if (analyzeBtn) {
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '<i class="fas fa-search mr-2"></i>분석';
+            analyzeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
     }
 }
 
