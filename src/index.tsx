@@ -173,31 +173,39 @@ app.post('/api/screenshot', async (c) => {
       return c.json({ error: 'URL이 필요합니다' }, 400)
     }
 
-    // Cloudflare Browser Rendering API 사용
-    // 실제 배포 시에는 Browser Rendering API를 활성화해야 합니다
-    // 개발 환경에서는 외부 스크린샷 서비스 API 사용
-    
-    // ScreenshotOne API 사용 예시 (무료 티어 제공)
-    // https://screenshotone.com/
-    const screenshotApiUrl = `https://api.screenshotone.com/take`
+    // Microlink 스크린샷 서비스 사용 (무료, API 키 불필요)
+    // https://microlink.io/docs/api/parameters/screenshot
+    const screenshotApiUrl = `https://api.microlink.io`
     const params = new URLSearchParams({
       url: url,
-      viewport_width: width.toString(),
-      viewport_height: '1080',
-      format: format,
-      full_page: fullPage.toString(),
-      access_key: 'demo', // 실제 배포 시 환경 변수로 관리
-      cache: 'false'
+      screenshot: 'true',
+      meta: 'false',
+      viewport: JSON.stringify({ width: width, height: 1080 }),
+      fullPage: fullPage.toString(),
+      type: format
     })
 
-    // 스크린샷 API 호출
+    // 스크린샷 API 호출 (JSON 응답)
     const response = await fetch(`${screenshotApiUrl}?${params.toString()}`)
     
     if (!response.ok) {
       throw new Error(`스크린샷 API 오류: ${response.status}`)
     }
 
-    const imageBuffer = await response.arrayBuffer()
+    // JSON 응답에서 스크린샷 URL 추출
+    const jsonResponse = await response.json()
+    
+    if (jsonResponse.status !== 'success' || !jsonResponse.data?.screenshot?.url) {
+      throw new Error('스크린샷 URL을 가져올 수 없습니다')
+    }
+    
+    // 스크린샷 이미지 다운로드
+    const imageResponse = await fetch(jsonResponse.data.screenshot.url)
+    if (!imageResponse.ok) {
+      throw new Error('스크린샷 이미지를 다운로드할 수 없습니다')
+    }
+    
+    const imageBuffer = await imageResponse.arrayBuffer()
     
     // R2에 저장
     const fileName = `screenshots/${Date.now()}-${Math.random().toString(36).substring(7)}.${format}`
@@ -241,38 +249,49 @@ app.post('/api/screenshots/batch', async (c) => {
 
     for (const url of urls) {
       try {
-        const screenshotApiUrl = `https://api.screenshotone.com/take`
+        const screenshotApiUrl = `https://api.microlink.io`
         const params = new URLSearchParams({
           url: url,
-          viewport_width: width.toString(),
-          viewport_height: '1080',
-          format: format,
-          full_page: fullPage.toString(),
-          access_key: 'demo',
-          cache: 'false'
+          screenshot: 'true',
+          meta: 'false',
+          viewport: JSON.stringify({ width: width, height: 1080 }),
+          fullPage: fullPage.toString(),
+          type: format
         })
 
         const response = await fetch(`${screenshotApiUrl}?${params.toString()}`)
         
         if (response.ok) {
-          const imageBuffer = await response.arrayBuffer()
-          const fileName = `screenshots/${Date.now()}-${Math.random().toString(36).substring(7)}.${format}`
+          const jsonResponse = await response.json()
           
-          const { env } = c
-          if (env.SCREENSHOTS) {
-            await env.SCREENSHOTS.put(fileName, imageBuffer, {
-              httpMetadata: {
-                contentType: `image/${format}`
-              }
+          if (jsonResponse.status === 'success' && jsonResponse.data?.screenshot?.url) {
+            // 스크린샷 이미지 다운로드
+            const imageResponse = await fetch(jsonResponse.data.screenshot.url)
+            const imageBuffer = await imageResponse.arrayBuffer()
+            const fileName = `screenshots/${Date.now()}-${Math.random().toString(36).substring(7)}.${format}`
+            
+            const { env } = c
+            if (env.SCREENSHOTS) {
+              await env.SCREENSHOTS.put(fileName, imageBuffer, {
+                httpMetadata: {
+                  contentType: `image/${format}`
+                }
+              })
+            }
+
+            results.push({
+              success: true,
+              url: url,
+              fileName: fileName,
+              size: imageBuffer.byteLength
+            })
+          } else {
+            results.push({
+              success: false,
+              url: url,
+              error: '스크린샷 URL을 가져올 수 없습니다'
             })
           }
-
-          results.push({
-            success: true,
-            url: url,
-            fileName: fileName,
-            size: imageBuffer.byteLength
-          })
         } else {
           results.push({
             success: false,
