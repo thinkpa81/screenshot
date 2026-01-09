@@ -52,6 +52,52 @@ app.get('/', (c) => {
                     </p>
                 </div>
 
+                <!-- 크롤링 모드 선택 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-spider mr-2"></i>크롤링 모드
+                    </label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="crawlMode" value="manual" checked class="mr-2">
+                            <span class="text-sm">수동 입력 (URL 목록)</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="crawlMode" value="auto" class="mr-2">
+                            <span class="text-sm">자동 크롤링 (전체 사이트)</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        자동 크롤링: 입력한 URL의 모든 내부 링크를 자동으로 찾아서 스크린샷 생성
+                    </p>
+                </div>
+
+                <!-- 크롤링 옵션 (자동 모드일 때만 표시) -->
+                <div id="crawlOptions" class="mb-6 hidden">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h4 class="text-sm font-semibold text-yellow-800 mb-2">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>크롤링 옵션
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">최대 페이지 수</label>
+                                <input type="number" id="maxPages" value="20" min="1" max="100" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">크롤링 깊이</label>
+                                <input type="number" id="maxDepth" value="2" min="1" max="5" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2">
+                            <i class="fas fa-lightbulb mr-1"></i>
+                            시작 URL에서 링크를 따라가며 자동으로 페이지를 찾습니다 (같은 도메인만)
+                        </p>
+                    </div>
+                </div>
+
                 <!-- 옵션 설정 -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
@@ -231,6 +277,103 @@ app.post('/api/screenshot', async (c) => {
     console.error('스크린샷 생성 오류:', error)
     return c.json({ 
       error: '스크린샷 생성 중 오류가 발생했습니다',
+      details: error instanceof Error ? error.message : String(error)
+    }, 500)
+  }
+})
+
+// 웹사이트 크롤링 API (모든 링크 추출)
+app.post('/api/crawl', async (c) => {
+  try {
+    const { url, maxPages = 20, maxDepth = 2 } = await c.req.json()
+
+    if (!url) {
+      return c.json({ error: 'URL이 필요합니다' }, 400)
+    }
+
+    // URL 정규화
+    const baseUrl = new URL(url)
+    const baseDomain = baseUrl.hostname
+    
+    // 크롤링할 URL 목록
+    const visited = new Set<string>()
+    const toVisit = [{ url: url, depth: 0 }]
+    const foundUrls: string[] = []
+
+    while (toVisit.length > 0 && foundUrls.length < maxPages) {
+      const current = toVisit.shift()
+      if (!current) break
+
+      const currentUrl = current.url
+      const currentDepth = current.depth
+
+      // 이미 방문했거나 깊이 제한을 초과한 경우 스킵
+      if (visited.has(currentUrl) || currentDepth > maxDepth) {
+        continue
+      }
+
+      visited.add(currentUrl)
+      foundUrls.push(currentUrl)
+
+      // Microlink API를 사용하여 링크 추출 (JavaScript 렌더링 지원)
+      try {
+        const microlinkUrl = `https://api.microlink.io`
+        const params = new URLSearchParams({
+          url: currentUrl,
+          meta: 'false',
+          data: 'links'
+        })
+
+        const response = await fetch(`${microlinkUrl}?${params.toString()}`)
+        
+        if (response.ok) {
+          const jsonResponse = await response.json()
+          
+          if (jsonResponse.status === 'success' && jsonResponse.data?.links) {
+            const links = jsonResponse.data.links
+            
+            for (const link of links) {
+              try {
+                const linkUrl = link.href
+                if (!linkUrl) continue
+                
+                // 상대 URL을 절대 URL로 변환
+                const absoluteUrl = new URL(linkUrl, currentUrl).href
+                const linkDomain = new URL(absoluteUrl).hostname
+
+                // 같은 도메인이고, 아직 방문하지 않은 경우만 추가
+                if (linkDomain === baseDomain && 
+                    !visited.has(absoluteUrl) && 
+                    !toVisit.some(item => item.url === absoluteUrl) &&
+                    !absoluteUrl.includes('#') && // 앵커 링크 제외
+                    !absoluteUrl.match(/\.(pdf|jpg|jpeg|png|gif|zip|rar|exe|dmg)$/i)) { // 파일 제외
+                  
+                  toVisit.push({ url: absoluteUrl, depth: currentDepth + 1 })
+                }
+              } catch (e) {
+                // URL 파싱 오류 무시
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`크롤링 오류 (${currentUrl}):`, error)
+      }
+    }
+
+    return c.json({
+      success: true,
+      baseUrl: url,
+      foundUrls: foundUrls,
+      count: foundUrls.length,
+      maxPages: maxPages,
+      maxDepth: maxDepth
+    })
+
+  } catch (error) {
+    console.error('크롤링 오류:', error)
+    return c.json({ 
+      error: '크롤링 중 오류가 발생했습니다',
       details: error instanceof Error ? error.message : String(error)
     }, 500)
   }

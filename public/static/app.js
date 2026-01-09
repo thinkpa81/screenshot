@@ -97,6 +97,9 @@ async function startScreenshots() {
         return;
     }
 
+    // 크롤링 모드 확인
+    const crawlMode = document.querySelector('input[name="crawlMode"]:checked').value;
+    
     // 입력값 가져오기
     const urlInput = document.getElementById('urlInput').value.trim();
     const width = parseInt(document.getElementById('widthSelect').value);
@@ -108,35 +111,98 @@ async function startScreenshots() {
         return;
     }
 
-    // URL 목록 파싱
-    const urls = urlInput.split('\n')
-        .map(url => url.trim())
-        .filter(url => url.length > 0);
+    let urls = [];
 
-    if (urls.length === 0) {
-        alert('유효한 URL을 입력해주세요.');
-        return;
+    if (crawlMode === 'auto') {
+        // 자동 크롤링 모드
+        const firstUrl = urlInput.split('\n')[0].trim();
+        
+        if (!isValidUrl(firstUrl)) {
+            alert('유효한 URL을 입력해주세요.');
+            return;
+        }
+
+        // UI 초기화
+        isProcessing = true;
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+        document.getElementById('progressSection').classList.remove('hidden');
+        document.getElementById('resultsSection').classList.add('hidden');
+        document.getElementById('logContainer').innerHTML = '';
+        document.getElementById('resultsGrid').innerHTML = '';
+        
+        updateProgress(0, 1);
+        addLog('🕷️ 웹사이트 크롤링을 시작합니다...', 'info');
+
+        // 크롤링 옵션
+        const maxPages = parseInt(document.getElementById('maxPages').value) || 20;
+        const maxDepth = parseInt(document.getElementById('maxDepth').value) || 2;
+
+        try {
+            // 크롤링 API 호출
+            addLog(`크롤링 중... (최대 ${maxPages}페이지, 깊이 ${maxDepth})`, 'info');
+            
+            const crawlResponse = await axios.post('/api/crawl', {
+                url: firstUrl,
+                maxPages: maxPages,
+                maxDepth: maxDepth
+            });
+
+            if (crawlResponse.data.success) {
+                urls = crawlResponse.data.foundUrls;
+                addLog(`✅ ${urls.length}개의 페이지를 발견했습니다!`, 'success');
+                
+                // 발견된 URL 목록 표시
+                urls.forEach((url, index) => {
+                    addLog(`  ${index + 1}. ${url}`, 'info');
+                });
+            } else {
+                throw new Error('크롤링 실패');
+            }
+        } catch (error) {
+            const errorMsg = error.response?.data?.error || error.message || '크롤링 오류';
+            addLog(`✗ 크롤링 실패: ${errorMsg}`, 'error');
+            isProcessing = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+            return;
+        }
+    } else {
+        // 수동 입력 모드
+        urls = urlInput.split('\n')
+            .map(url => url.trim())
+            .filter(url => url.length > 0);
+
+        if (urls.length === 0) {
+            alert('유효한 URL을 입력해주세요.');
+            return;
+        }
+
+        // URL 검증
+        const invalidUrls = urls.filter(url => !isValidUrl(url));
+        if (invalidUrls.length > 0) {
+            alert(`다음 URL이 유효하지 않습니다:\n${invalidUrls.join('\n')}`);
+            return;
+        }
+
+        // UI 초기화
+        isProcessing = true;
+        currentResults = [];
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+        document.getElementById('progressSection').classList.remove('hidden');
+        document.getElementById('resultsSection').classList.add('hidden');
+        document.getElementById('logContainer').innerHTML = '';
+        document.getElementById('resultsGrid').innerHTML = '';
+        
+        updateProgress(0, urls.length);
+        addLog(`총 ${urls.length}개의 URL 스크린샷 생성을 시작합니다...`, 'info');
     }
 
-    // URL 검증
-    const invalidUrls = urls.filter(url => !isValidUrl(url));
-    if (invalidUrls.length > 0) {
-        alert(`다음 URL이 유효하지 않습니다:\n${invalidUrls.join('\n')}`);
-        return;
-    }
-
-    // UI 초기화
-    isProcessing = true;
+    // 스크린샷 생성 시작
     currentResults = [];
-    document.getElementById('startBtn').disabled = true;
-    document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
-    document.getElementById('progressSection').classList.remove('hidden');
-    document.getElementById('resultsSection').classList.add('hidden');
-    document.getElementById('logContainer').innerHTML = '';
-    document.getElementById('resultsGrid').innerHTML = '';
-    
     updateProgress(0, urls.length);
-    addLog(`총 ${urls.length}개의 URL 스크린샷 생성을 시작합니다...`, 'info');
+    addLog(`📸 ${urls.length}개 페이지의 스크린샷을 생성합니다...`, 'info');
 
     // 순차 처리
     let completed = 0;
@@ -176,7 +242,7 @@ async function startScreenshots() {
     const successCount = currentResults.filter(r => r.success).length;
     const failCount = currentResults.length - successCount;
     
-    addLog(`처리 완료! 성공: ${successCount}개, 실패: ${failCount}개`, successCount === urls.length ? 'success' : 'warning');
+    addLog(`🎉 처리 완료! 성공: ${successCount}개, 실패: ${failCount}개`, successCount === urls.length ? 'success' : 'warning');
     
     document.getElementById('resultsSection').classList.remove('hidden');
     document.getElementById('startBtn').disabled = false;
@@ -206,5 +272,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.ctrlKey && e.key === 'Enter') {
             startScreenshots();
         }
+    });
+
+    // 크롤링 모드 변경 시 옵션 표시/숨김
+    document.querySelectorAll('input[name="crawlMode"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const crawlOptions = document.getElementById('crawlOptions');
+            if (e.target.value === 'auto') {
+                crawlOptions.classList.remove('hidden');
+            } else {
+                crawlOptions.classList.add('hidden');
+            }
+        });
     });
 });
