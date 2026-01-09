@@ -1,6 +1,114 @@
 // 전역 상태
 let isProcessing = false;
 let currentResults = [];
+let foundUrlsCache = []; // 발견된 URL 캐시
+
+// 사이트 분석 함수
+async function analyzeSite() {
+    const analyzeUrl = document.getElementById('analyzeUrl').value.trim();
+    
+    if (!analyzeUrl) {
+        alert('분석할 사이트 URL을 입력해주세요.');
+        return;
+    }
+
+    if (!isValidUrl(analyzeUrl)) {
+        alert('유효한 URL을 입력해주세요.\n예: https://example.com');
+        return;
+    }
+
+    // UI 업데이트
+    const analyzeResult = document.getElementById('analyzeResult');
+    const foundUrlList = document.getElementById('foundUrlList');
+    const foundUrlCount = document.getElementById('foundUrlCount');
+
+    analyzeResult.classList.remove('hidden');
+    foundUrlList.innerHTML = '<div class="text-gray-500 text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>사이트를 분석하는 중...</div>';
+
+    try {
+        // 분석 API 호출
+        const response = await axios.post('/api/analyze', {
+            url: analyzeUrl
+        });
+
+        if (response.data.success) {
+            foundUrlsCache = response.data.foundUrls;
+            foundUrlCount.textContent = foundUrlsCache.length;
+
+            // URL 목록 표시
+            if (foundUrlsCache.length > 0) {
+                foundUrlList.innerHTML = foundUrlsCache.map((url, index) => `
+                    <div class="py-1 border-b border-gray-200 last:border-b-0 hover:bg-gray-100 px-2 rounded text-gray-700">
+                        ${index + 1}. ${url}
+                    </div>
+                `).join('');
+            } else {
+                foundUrlList.innerHTML = '<div class="text-yellow-600 text-center py-4"><i class="fas fa-exclamation-triangle mr-2"></i>발견된 URL이 없습니다.</div>';
+            }
+        } else {
+            throw new Error(response.data.error || '분석 실패');
+        }
+    } catch (error) {
+        const errorMsg = error.response?.data?.error || error.message || '분석 오류';
+        foundUrlList.innerHTML = `<div class="text-red-600 text-center py-4"><i class="fas fa-times-circle mr-2"></i>${errorMsg}</div>`;
+        console.error('사이트 분석 오류:', error);
+    }
+}
+
+// 발견된 URL 복사
+function copyFoundUrls() {
+    if (foundUrlsCache.length === 0) {
+        alert('복사할 URL이 없습니다.');
+        return;
+    }
+
+    const urlText = foundUrlsCache.join('\n');
+    
+    // 클립보드에 복사
+    navigator.clipboard.writeText(urlText).then(() => {
+        // 복사 성공 알림
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check mr-1"></i>복사됨!';
+        btn.classList.remove('bg-green-500', 'hover:bg-green-600');
+        btn.classList.add('bg-gray-500');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('bg-gray-500');
+            btn.classList.add('bg-green-500', 'hover:bg-green-600');
+        }, 2000);
+    }).catch(err => {
+        alert('복사 실패: ' + err.message);
+    });
+}
+
+// 발견된 URL을 입력란에 적용
+function applyFoundUrls() {
+    if (foundUrlsCache.length === 0) {
+        alert('적용할 URL이 없습니다.');
+        return;
+    }
+
+    const urlInput = document.getElementById('urlInput');
+    urlInput.value = foundUrlsCache.join('\n');
+    
+    // 스크롤하여 URL 입력란으로 이동
+    urlInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // 입력란 하이라이트 효과
+    urlInput.classList.add('ring-4', 'ring-indigo-300');
+    setTimeout(() => {
+        urlInput.classList.remove('ring-4', 'ring-indigo-300');
+    }, 2000);
+
+    // 성공 메시지
+    alert(`${foundUrlsCache.length}개의 URL이 입력란에 적용되었습니다!`);
+}
+
+// 전역 상태
+let isProcessing = false;
+let currentResults = [];
 
 // URL 검증 함수
 function isValidUrl(string) {

@@ -35,6 +35,63 @@ app.get('/', (c) => {
                 </h1>
                 <p class="text-gray-600 mb-8">여러 URL의 전체 페이지 스크린샷을 한 번에 생성하세요</p>
 
+                <!-- 사이트 분석 도구 -->
+                <div class="mb-6">
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4">
+                        <h3 class="text-sm font-bold text-purple-800 mb-3 flex items-center">
+                            <i class="fas fa-search-plus mr-2"></i>
+                            🔍 사이트 URL 자동 분석
+                        </h3>
+                        <p class="text-xs text-gray-600 mb-3">
+                            웹사이트의 모든 페이지 URL을 자동으로 찾아드립니다. 시작 URL만 입력하세요!
+                        </p>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="analyzeUrl" 
+                                placeholder="https://example.com" 
+                                class="flex-1 px-4 py-2 border border-purple-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            >
+                            <button 
+                                onclick="analyzeSite()"
+                                class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition duration-200 flex items-center text-sm"
+                            >
+                                <i class="fas fa-search mr-2"></i>
+                                분석
+                            </button>
+                        </div>
+                        
+                        <!-- 분석 결과 영역 -->
+                        <div id="analyzeResult" class="mt-4 hidden">
+                            <div class="bg-white rounded-lg p-4 border border-purple-200">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-semibold text-purple-800">
+                                        <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                                        발견된 URL: <span id="foundUrlCount">0</span>개
+                                    </span>
+                                    <button 
+                                        onclick="copyFoundUrls()"
+                                        class="px-4 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded transition duration-200"
+                                    >
+                                        <i class="fas fa-copy mr-1"></i>
+                                        전체 복사
+                                    </button>
+                                </div>
+                                <div id="foundUrlList" class="max-h-48 overflow-y-auto bg-gray-50 rounded p-3 font-mono text-xs">
+                                    <!-- URL 목록이 여기에 표시됩니다 -->
+                                </div>
+                                <button 
+                                    onclick="applyFoundUrls()"
+                                    class="w-full mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-200"
+                                >
+                                    <i class="fas fa-arrow-down mr-2"></i>
+                                    아래 URL 입력란에 적용하기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- URL 입력 영역 -->
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -277,6 +334,119 @@ app.post('/api/screenshot', async (c) => {
     console.error('스크린샷 생성 오류:', error)
     return c.json({ 
       error: '스크린샷 생성 중 오류가 발생했습니다',
+      details: error instanceof Error ? error.message : String(error)
+    }, 500)
+  }
+})
+
+// 웹사이트 URL 분석 API (일반적인 경로 체크)
+app.post('/api/analyze', async (c) => {
+  try {
+    const { url } = await c.req.json()
+
+    if (!url) {
+      return c.json({ error: 'URL이 필요합니다' }, 400)
+    }
+
+    // URL 정규화
+    const baseUrl = new URL(url)
+    const baseDomain = baseUrl.origin
+    
+    // 일반적인 웹사이트 경로 패턴
+    const commonPaths = [
+      '/',
+      '/about',
+      '/contact',
+      '/faq',
+      '/login',
+      '/signup',
+      '/register',
+      '/settings',
+      '/profile',
+      '/dashboard',
+      // 학교/교육 관련
+      '/courses',
+      '/courses/major',
+      '/courses/general',
+      '/subjects',
+      '/schedule',
+      '/requirements',
+      '/requirements/master',
+      '/requirements/doctoral',
+      '/graduation',
+      '/thesis',
+      '/credits',
+      '/papers',
+      '/papers/international-conference',
+      '/papers/domestic-conference',
+      '/papers/international-journal',
+      '/papers/domestic-journal',
+      // 일반 사이트 패턴
+      '/products',
+      '/services',
+      '/pricing',
+      '/features',
+      '/blog',
+      '/news',
+      '/events',
+      '/gallery',
+      '/portfolio',
+      '/team',
+      '/careers',
+      '/support',
+      '/docs',
+      '/documentation',
+      '/api',
+      '/terms',
+      '/privacy',
+      '/sitemap'
+    ]
+
+    const foundUrls: string[] = []
+    const checkPromises = []
+
+    // 모든 경로를 병렬로 체크
+    for (const path of commonPaths) {
+      const fullUrl = `${baseDomain}${path}`
+      
+      checkPromises.push(
+        fetch(fullUrl, { 
+          method: 'HEAD',
+          headers: { 'User-Agent': 'Mozilla/5.0' }
+        })
+          .then(response => {
+            if (response.ok) {
+              return fullUrl
+            }
+            return null
+          })
+          .catch(() => null)
+      )
+    }
+
+    const results = await Promise.all(checkPromises)
+    
+    // null이 아닌 결과만 필터링
+    for (const result of results) {
+      if (result) {
+        foundUrls.push(result)
+      }
+    }
+
+    // 중복 제거 및 정렬
+    const uniqueUrls = Array.from(new Set(foundUrls)).sort()
+
+    return c.json({
+      success: true,
+      baseUrl: url,
+      foundUrls: uniqueUrls,
+      count: uniqueUrls.length
+    })
+
+  } catch (error) {
+    console.error('사이트 분석 오류:', error)
+    return c.json({ 
+      error: '사이트 분석 중 오류가 발생했습니다',
       details: error instanceof Error ? error.message : String(error)
     }, 500)
   }
