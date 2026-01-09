@@ -193,10 +193,6 @@ function applyFoundUrls() {
     alert(`${foundUrlsCache.length}개의 URL이 입력란에 적용되었습니다!`);
 }
 
-// 전역 상태
-let isProcessing = false;
-let currentResults = [];
-
 // URL 검증 함수
 function isValidUrl(string) {
     try {
