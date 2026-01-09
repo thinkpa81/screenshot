@@ -5,7 +5,10 @@ let foundUrlsCache = []; // 발견된 URL 캐시
 
 // 사이트 분석 함수
 async function analyzeSite() {
+    console.log('analyzeSite() 함수 호출됨'); // 디버그 로그
+    
     const analyzeUrl = document.getElementById('analyzeUrl').value.trim();
+    console.log('입력된 URL:', analyzeUrl); // 디버그 로그
     
     if (!analyzeUrl) {
         alert('분석할 사이트 URL을 입력해주세요.');
@@ -17,11 +20,15 @@ async function analyzeSite() {
         return;
     }
 
+    console.log('분석 시작...'); // 디버그 로그
+
     // UI 업데이트
     const analyzeResult = document.getElementById('analyzeResult');
     const foundUrlList = document.getElementById('foundUrlList');
     const foundUrlCount = document.getElementById('foundUrlCount');
     const analyzeBtn = document.querySelector('button[onclick="analyzeSite()"]');
+
+    console.log('DOM 요소 확인:', { analyzeResult, foundUrlList, foundUrlCount, analyzeBtn }); // 디버그 로그
 
     // 버튼 비활성화
     if (analyzeBtn) {
@@ -57,10 +64,14 @@ async function analyzeSite() {
     }, 200);
 
     try {
+        console.log('API 호출 시작...'); // 디버그 로그
+        
         // 분석 API 호출
         const response = await axios.post('/api/analyze', {
             url: analyzeUrl
         });
+
+        console.log('API 응답:', response.data); // 디버그 로그
 
         // 진행률 100%로 설정
         clearInterval(progressInterval);
@@ -75,6 +86,8 @@ async function analyzeSite() {
         if (response.data.success) {
             foundUrlsCache = response.data.foundUrls;
             foundUrlCount.textContent = foundUrlsCache.length;
+
+            console.log('발견된 URL 개수:', foundUrlsCache.length); // 디버그 로그
 
             // URL 목록 표시
             if (foundUrlsCache.length > 0) {
@@ -93,6 +106,8 @@ async function analyzeSite() {
                         `).join('')}
                     </div>
                 `;
+                
+                console.log('URL 목록 표시 완료'); // 디버그 로그
             } else {
                 foundUrlList.innerHTML = '<div class="text-yellow-600 text-center py-4"><i class="fas fa-exclamation-triangle mr-2"></i>발견된 URL이 없습니다.</div>';
             }
@@ -100,6 +115,8 @@ async function analyzeSite() {
             throw new Error(response.data.error || '분석 실패');
         }
     } catch (error) {
+        console.error('에러 발생:', error); // 디버그 로그
+        
         clearInterval(progressInterval);
         const errorMsg = error.response?.data?.error || error.message || '분석 오류';
         foundUrlList.innerHTML = `
@@ -111,6 +128,8 @@ async function analyzeSite() {
         `;
         console.error('사이트 분석 오류:', error);
     } finally {
+        console.log('분석 완료 (finally)'); // 디버그 로그
+        
         // 버튼 다시 활성화
         if (analyzeBtn) {
             analyzeBtn.disabled = false;
@@ -119,6 +138,9 @@ async function analyzeSite() {
         }
     }
 }
+
+// 페이지 로드 시 함수 등록 확인
+console.log('app.js 로드됨, analyzeSite 함수 등록:', typeof analyzeSite); // 디버그 로그
 
 // 발견된 URL 복사
 function copyFoundUrls() {
