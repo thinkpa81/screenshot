@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/cloudflare-workers'
+import { zipSync } from 'fflate'
 
 type Bindings = {
   SCREENSHOTS: R2Bucket;
@@ -223,10 +224,20 @@ app.get('/', (c) => {
 
                 <!-- 결과 영역 -->
                 <div id="resultsSection" class="mt-8 hidden">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-images mr-2 text-green-600"></i>
-                        생성된 스크린샷
-                    </h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-images mr-2 text-green-600"></i>
+                            생성된 스크린샷
+                        </h3>
+                        <button 
+                            id="downloadAllZipBtn"
+                            onclick="downloadAllAsZip()"
+                            class="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition duration-200 flex items-center shadow-lg"
+                        >
+                            <i class="fas fa-file-archive mr-2"></i>
+                            전체 ZIP 다운로드
+                        </button>
+                    </div>
                     <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <!-- 결과가 여기에 추가됩니다 -->
                     </div>
@@ -692,6 +703,55 @@ app.get('/api/screenshots', async (c) => {
   } catch (error) {
     console.error('스크린샷 목록 조회 오류:', error)
     return c.json({ error: '스크린샷 목록을 불러올 수 없습니다' }, 500)
+  }
+})
+
+// 스크린샷 ZIP 일괄 다운로드
+app.post('/api/screenshots/download-zip', async (c) => {
+  try {
+    const { fileNames } = await c.req.json()
+    
+    if (!fileNames || !Array.isArray(fileNames) || fileNames.length === 0) {
+      return c.json({ error: '다운로드할 파일 목록이 필요합니다' }, 400)
+    }
+
+    const { env } = c
+
+    if (!env.SCREENSHOTS) {
+      return c.json({ error: 'R2 bucket이 설정되지 않았습니다' }, 500)
+    }
+
+    // ZIP 파일에 포함될 파일들을 저장할 객체
+    const files: { [key: string]: Uint8Array } = {}
+
+    // 각 파일을 R2에서 가져와서 ZIP에 추가
+    for (const fileName of fileNames) {
+      try {
+        const object = await env.SCREENSHOTS.get(`screenshots/${fileName}`)
+        
+        if (object) {
+          const arrayBuffer = await object.arrayBuffer()
+          files[fileName] = new Uint8Array(arrayBuffer)
+        }
+      } catch (error) {
+        console.error(`파일 가져오기 실패: ${fileName}`, error)
+      }
+    }
+
+    // ZIP 파일 생성
+    const zipped = zipSync(files, { level: 6 })
+
+    // ZIP 파일을 응답으로 반환
+    return new Response(zipped, {
+      headers: {
+        'Content-Type': 'application/zip',
+        'Content-Disposition': `attachment; filename="screenshots-${Date.now()}.zip"`,
+        'Cache-Control': 'no-cache'
+      }
+    })
+  } catch (error) {
+    console.error('ZIP 생성 오류:', error)
+    return c.json({ error: 'ZIP 파일 생성 중 오류가 발생했습니다', details: error.message }, 500)
   }
 })
 

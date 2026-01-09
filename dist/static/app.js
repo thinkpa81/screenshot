@@ -441,7 +441,61 @@ async function startScreenshots() {
     isProcessing = false;
 }
 
-// 일괄 다운로드 (추후 구현 가능)
+// 일괄 ZIP 다운로드
+async function downloadAllAsZip() {
+    const successResults = currentResults.filter(r => r.success);
+    if (successResults.length === 0) {
+        alert('다운로드할 스크린샷이 없습니다.');
+        return;
+    }
+    
+    const downloadBtn = document.getElementById('downloadAllZipBtn');
+    const originalHTML = downloadBtn.innerHTML;
+    
+    try {
+        // 버튼 비활성화
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>ZIP 생성 중...';
+        downloadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        
+        // 파일명 목록 추출
+        const fileNames = successResults.map(r => r.fileName.split('/').pop());
+        
+        addLog(`ZIP 파일 생성 중... (${fileNames.length}개 파일)`, 'info');
+        
+        // API 호출
+        const response = await axios.post('/api/screenshots/download-zip', {
+            fileNames: fileNames
+        }, {
+            responseType: 'blob'
+        });
+        
+        // Blob으로 다운로드
+        const blob = new Blob([response.data], { type: 'application/zip' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `screenshots-${Date.now()}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        addLog(`✅ ZIP 파일 다운로드 완료! (${fileNames.length}개 파일)`, 'success');
+        
+    } catch (error) {
+        console.error('ZIP 다운로드 오류:', error);
+        addLog(`❌ ZIP 다운로드 실패: ${error.message}`, 'error');
+        alert('ZIP 파일 생성 중 오류가 발생했습니다.');
+    } finally {
+        // 버튼 복원
+        downloadBtn.disabled = false;
+        downloadBtn.innerHTML = originalHTML;
+        downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+// 개별 다운로드 (기존 함수 유지)
 function downloadAll() {
     const successResults = currentResults.filter(r => r.success);
     if (successResults.length === 0) {
