@@ -16,7 +16,7 @@
 
 ## URLs
 - **개발 서버**: https://3000-ips6pt99u0inim1wati14-5185f4aa.sandbox.novita.ai
-- **GitHub**: (배포 후 추가 예정)
+- **GitHub**: https://github.com/thinkpa81/screenshot
 - **프로덕션**: (Cloudflare Pages 배포 후 추가 예정)
 
 ## 데이터 아키텍처
