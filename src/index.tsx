@@ -191,14 +191,25 @@ app.get('/', (c) => {
                 </div>
 
                 <!-- 실행 버튼 -->
-                <button 
-                    id="startBtn" 
-                    onclick="startScreenshots()"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center text-lg shadow-lg"
-                >
-                    <i class="fas fa-play-circle mr-3 text-xl"></i>
-                    스크린샷 생성 시작
-                </button>
+                <div class="flex gap-4">
+                    <button 
+                        id="startBtn" 
+                        onclick="startScreenshots()"
+                        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center text-lg shadow-lg"
+                    >
+                        <i class="fas fa-play-circle mr-3 text-xl"></i>
+                        스크린샷 생성 시작
+                    </button>
+                    <button 
+                        id="resetBtn" 
+                        onclick="resetAll()"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center text-lg shadow-lg"
+                        title="모든 입력과 결과 초기화"
+                    >
+                        <i class="fas fa-redo mr-2 text-xl"></i>
+                        초기화
+                    </button>
+                </div>
 
                 <!-- 진행 상태 -->
                 <div id="progressSection" class="mt-8 hidden">

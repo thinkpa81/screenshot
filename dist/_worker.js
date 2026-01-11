@@ -1,4 +1,13 @@
-var br=Object.defineProperty;var Ct=e=>{throw TypeError(e)};var Er=(e,t,r)=>t in e?br(e,t,{enumerable:!0,configurable:!0,writable:!0,value:r}):e[t]=r;var x=(e,t,r)=>Er(e,typeof t!="symbol"?t+"":t,r),ut=(e,t,r)=>t.has(e)||Ct("Cannot "+r);var u=(e,t,r)=>(ut(e,t,"read from private field"),r?r.call(e):t.get(e)),b=(e,t,r)=>t.has(e)?Ct("Cannot add the same private member more than once"):t instanceof WeakSet?t.add(e):t.set(e,r),v=(e,t,r,s)=>(ut(e,t,"write to private field"),s?s.call(e,r):t.set(e,r),r),S=(e,t,r)=>(ut(e,t,"access private method"),r);var Tt=(e,t,r,s)=>({set _(n){v(e,t,n,r)},get _(){return u(e,t,s)}});var Pt=(e,t,r)=>(s,n)=>{let a=-1;return i(0);async function i(l){if(l<=a)throw new Error("next() called multiple times");a=l;let o,c=!1,f;if(e[l]?(f=e[l][0][0],s.req.routeIndex=l):f=l===e.length&&n||void 0,f)try{o=await f(s,()=>i(l+1))}catch(h){if(h instanceof Error&&t)s.error=h,o=await t(h,s),c=!0;else throw h}else s.finalized===!1&&r&&(o=await r(s));return o&&(s.finalized===!1||c)&&(s.res=o),s}},Rr=Symbol(),Sr=async(e,t=Object.create(null))=>{const{all:r=!1,dot:s=!1}=t,a=(e instanceof Qt?e.raw.headers:e.headers).get("Content-Type");return a!=null&&a.startsWith("multipart/form-data")||a!=null&&a.startsWith("application/x-www-form-urlencoded")?jr(e,{all:r,dot:s}):{}};async function jr(e,t){const r=await e.formData();return r?Ar(r,t):{}}function Ar(e,t){const r=Object.create(null);return e.forEach((s,n)=>{t.all||n.endsWith("[]")?Or(r,n,s):r[n]=s}),t.dot&&Object.entries(r).forEach(([s,n])=>{s.includes(".")&&(Cr(r,s,n),delete r[s])}),r}var Or=(e,t,r)=>{e[t]!==void 0?Array.isArray(e[t])?e[t].push(r):e[t]=[e[t],r]:t.endsWith("[]")?e[t]=[r]:e[t]=r},Cr=(e,t,r)=>{let s=e;const n=t.split(".");n.forEach((a,i)=>{i===n.length-1?s[a]=r:((!s[a]||typeof s[a]!="object"||Array.isArray(s[a])||s[a]instanceof File)&&(s[a]=Object.create(null)),s=s[a])})},Vt=e=>{const t=e.split("/");return t[0]===""&&t.shift(),t},Tr=e=>{const{groups:t,path:r}=Pr(e),s=Vt(r);return kr(s,t)},Pr=e=>{const t=[];return e=e.replace(/\{[^}]+\}/g,(r,s)=>{const n=`@${s}`;return t.push([n,r]),n}),{groups:t,path:e}},kr=(e,t)=>{for(let r=t.length-1;r>=0;r--){const[s]=t[r];for(let n=e.length-1;n>=0;n--)if(e[n].includes(s)){e[n]=e[n].replace(s,t[r][1]);break}}return e},Xe={},Nr=(e,t)=>{if(e==="*")return"*";const r=e.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);if(r){const s=`${e}#${t}`;return Xe[s]||(r[2]?Xe[s]=t&&t[0]!==":"&&t[0]!=="*"?[s,r[1],new RegExp(`^${r[2]}(?=/${t})`)]:[e,r[1],new RegExp(`^${r[2]}$`)]:Xe[s]=[e,r[1],!0]),Xe[s]}return null},yt=(e,t)=>{try{return t(e)}catch{return e.replace(/(?:%[0-9A-Fa-f]{2})+/g,r=>{try{return t(r)}catch{return r}})}},Ur=e=>yt(e,decodeURI),Jt=e=>{const t=e.url,r=t.indexOf("/",t.indexOf(":")+4);let s=r;for(;s<t.length;s++){const n=t.charCodeAt(s);if(n===37){const a=t.indexOf("?",s),i=t.slice(r,a===-1?void 0:a);return Ur(i.includes("%25")?i.replace(/%25/g,"%2525"):i)}else if(n===63)break}return t.slice(r,s)},$r=e=>{const t=Jt(e);return t.length>1&&t.at(-1)==="/"?t.slice(0,-1):t},Te=(e,t,...r)=>(r.length&&(t=Te(t,...r)),`${(e==null?void 0:e[0])==="/"?"":"/"}${e}${t==="/"?"":`${(e==null?void 0:e.at(-1))==="/"?"":"/"}${(t==null?void 0:t[0])==="/"?t.slice(1):t}`}`),Yt=e=>{if(e.charCodeAt(e.length-1)!==63||!e.includes(":"))return null;const t=e.split("/"),r=[];let s="";return t.forEach(n=>{if(n!==""&&!/\:/.test(n))s+="/"+n;else if(/\:/.test(n))if(/\?/.test(n)){r.length===0&&s===""?r.push("/"):r.push(s);const a=n.replace("?","");s+="/"+a,r.push(s)}else s+="/"+n}),r.filter((n,a,i)=>i.indexOf(n)===a)},ht=e=>/[%+]/.test(e)?(e.indexOf("+")!==-1&&(e=e.replace(/\+/g," ")),e.indexOf("%")!==-1?yt(e,Xt):e):e,Zt=(e,t,r)=>{let s;if(!r&&t&&!/[%+]/.test(t)){let i=e.indexOf("?",8);if(i===-1)return;for(e.startsWith(t,i+1)||(i=e.indexOf(`&${t}`,i+1));i!==-1;){const l=e.charCodeAt(i+t.length+1);if(l===61){const o=i+t.length+2,c=e.indexOf("&",o);return ht(e.slice(o,c===-1?void 0:c))}else if(l==38||isNaN(l))return"";i=e.indexOf(`&${t}`,i+1)}if(s=/[%+]/.test(e),!s)return}const n={};s??(s=/[%+]/.test(e));let a=e.indexOf("?",8);for(;a!==-1;){const i=e.indexOf("&",a+1);let l=e.indexOf("=",a);l>i&&i!==-1&&(l=-1);let o=e.slice(a+1,l===-1?i===-1?void 0:i:l);if(s&&(o=ht(o)),a=i,o==="")continue;let c;l===-1?c="":(c=e.slice(l+1,i===-1?void 0:i),s&&(c=ht(c))),r?(n[o]&&Array.isArray(n[o])||(n[o]=[]),n[o].push(c)):n[o]??(n[o]=c)}return t?n[t]:n},Hr=Zt,Lr=(e,t)=>Zt(e,t,!0),Xt=decodeURIComponent,kt=e=>yt(e,Xt),Ne,W,oe,er,tr,gt,fe,zt,Qt=(zt=class{constructor(e,t="/",r=[[]]){b(this,oe);x(this,"raw");b(this,Ne);b(this,W);x(this,"routeIndex",0);x(this,"path");x(this,"bodyCache",{});b(this,fe,e=>{const{bodyCache:t,raw:r}=this,s=t[e];if(s)return s;const n=Object.keys(t)[0];return n?t[n].then(a=>(n==="json"&&(a=JSON.stringify(a)),new Response(a)[e]())):t[e]=r[e]()});this.raw=e,this.path=t,v(this,W,r),v(this,Ne,{})}param(e){return e?S(this,oe,er).call(this,e):S(this,oe,tr).call(this)}query(e){return Hr(this.url,e)}queries(e){return Lr(this.url,e)}header(e){if(e)return this.raw.headers.get(e)??void 0;const t={};return this.raw.headers.forEach((r,s)=>{t[s]=r}),t}async parseBody(e){var t;return(t=this.bodyCache).parsedBody??(t.parsedBody=await Sr(this,e))}json(){return u(this,fe).call(this,"text").then(e=>JSON.parse(e))}text(){return u(this,fe).call(this,"text")}arrayBuffer(){return u(this,fe).call(this,"arrayBuffer")}blob(){return u(this,fe).call(this,"blob")}formData(){return u(this,fe).call(this,"formData")}addValidatedData(e,t){u(this,Ne)[e]=t}valid(e){return u(this,Ne)[e]}get url(){return this.raw.url}get method(){return this.raw.method}get[Rr](){return u(this,W)}get matchedRoutes(){return u(this,W)[0].map(([[,e]])=>e)}get routePath(){return u(this,W)[0].map(([[,e]])=>e)[this.routeIndex].path}},Ne=new WeakMap,W=new WeakMap,oe=new WeakSet,er=function(e){const t=u(this,W)[0][this.routeIndex][1][e],r=S(this,oe,gt).call(this,t);return r&&/\%/.test(r)?kt(r):r},tr=function(){const e={},t=Object.keys(u(this,W)[0][this.routeIndex][1]);for(const r of t){const s=S(this,oe,gt).call(this,u(this,W)[0][this.routeIndex][1][r]);s!==void 0&&(e[r]=/\%/.test(s)?kt(s):s)}return e},gt=function(e){return u(this,W)[1]?u(this,W)[1][e]:e},fe=new WeakMap,zt),Mr={Stringify:1},rr=async(e,t,r,s,n)=>{typeof e=="object"&&!(e instanceof String)&&(e instanceof Promise||(e=e.toString()),e instanceof Promise&&(e=await e));const a=e.callbacks;return a!=null&&a.length?(n?n[0]+=e:n=[e],Promise.all(a.map(l=>l({phase:t,buffer:n,context:s}))).then(l=>Promise.all(l.filter(Boolean).map(o=>rr(o,t,!1,s,n))).then(()=>n[0]))):Promise.resolve(e)},Dr="text/plain; charset=UTF-8",dt=(e,t)=>({"Content-Type":e,...t}),Ge,Ke,se,Ue,ne,q,Ve,$e,He,we,Je,Ye,ue,Pe,qt,_r=(qt=class{constructor(e,t){b(this,ue);b(this,Ge);b(this,Ke);x(this,"env",{});b(this,se);x(this,"finalized",!1);x(this,"error");b(this,Ue);b(this,ne);b(this,q);b(this,Ve);b(this,$e);b(this,He);b(this,we);b(this,Je);b(this,Ye);x(this,"render",(...e)=>(u(this,$e)??v(this,$e,t=>this.html(t)),u(this,$e).call(this,...e)));x(this,"setLayout",e=>v(this,Ve,e));x(this,"getLayout",()=>u(this,Ve));x(this,"setRenderer",e=>{v(this,$e,e)});x(this,"header",(e,t,r)=>{this.finalized&&v(this,q,new Response(u(this,q).body,u(this,q)));const s=u(this,q)?u(this,q).headers:u(this,we)??v(this,we,new Headers);t===void 0?s.delete(e):r!=null&&r.append?s.append(e,t):s.set(e,t)});x(this,"status",e=>{v(this,Ue,e)});x(this,"set",(e,t)=>{u(this,se)??v(this,se,new Map),u(this,se).set(e,t)});x(this,"get",e=>u(this,se)?u(this,se).get(e):void 0);x(this,"newResponse",(...e)=>S(this,ue,Pe).call(this,...e));x(this,"body",(e,t,r)=>S(this,ue,Pe).call(this,e,t,r));x(this,"text",(e,t,r)=>!u(this,we)&&!u(this,Ue)&&!t&&!r&&!this.finalized?new Response(e):S(this,ue,Pe).call(this,e,t,dt(Dr,r)));x(this,"json",(e,t,r)=>S(this,ue,Pe).call(this,JSON.stringify(e),t,dt("application/json",r)));x(this,"html",(e,t,r)=>{const s=n=>S(this,ue,Pe).call(this,n,t,dt("text/html; charset=UTF-8",r));return typeof e=="object"?rr(e,Mr.Stringify,!1,{}).then(s):s(e)});x(this,"redirect",(e,t)=>{const r=String(e);return this.header("Location",/[^\x00-\xFF]/.test(r)?encodeURI(r):r),this.newResponse(null,t??302)});x(this,"notFound",()=>(u(this,He)??v(this,He,()=>new Response),u(this,He).call(this,this)));v(this,Ge,e),t&&(v(this,ne,t.executionCtx),this.env=t.env,v(this,He,t.notFoundHandler),v(this,Ye,t.path),v(this,Je,t.matchResult))}get req(){return u(this,Ke)??v(this,Ke,new Qt(u(this,Ge),u(this,Ye),u(this,Je))),u(this,Ke)}get event(){if(u(this,ne)&&"respondWith"in u(this,ne))return u(this,ne);throw Error("This context has no FetchEvent")}get executionCtx(){if(u(this,ne))return u(this,ne);throw Error("This context has no ExecutionContext")}get res(){return u(this,q)||v(this,q,new Response(null,{headers:u(this,we)??v(this,we,new Headers)}))}set res(e){if(u(this,q)&&e){e=new Response(e.body,e);for(const[t,r]of u(this,q).headers.entries())if(t!=="content-type")if(t==="set-cookie"){const s=u(this,q).headers.getSetCookie();e.headers.delete("set-cookie");for(const n of s)e.headers.append("set-cookie",n)}else e.headers.set(t,r)}v(this,q,e),this.finalized=!0}get var(){return u(this,se)?Object.fromEntries(u(this,se)):{}}},Ge=new WeakMap,Ke=new WeakMap,se=new WeakMap,Ue=new WeakMap,ne=new WeakMap,q=new WeakMap,Ve=new WeakMap,$e=new WeakMap,He=new WeakMap,we=new WeakMap,Je=new WeakMap,Ye=new WeakMap,ue=new WeakSet,Pe=function(e,t,r){const s=u(this,q)?new Headers(u(this,q).headers):u(this,we)??new Headers;if(typeof t=="object"&&"headers"in t){const a=t.headers instanceof Headers?t.headers:new Headers(t.headers);for(const[i,l]of a)i.toLowerCase()==="set-cookie"?s.append(i,l):s.set(i,l)}if(r)for(const[a,i]of Object.entries(r))if(typeof i=="string")s.set(a,i);else{s.delete(a);for(const l of i)s.append(a,l)}const n=typeof t=="number"?t:(t==null?void 0:t.status)??u(this,Ue);return new Response(e,{status:n,headers:s})},qt),k="ALL",Ir="all",Fr=["get","post","put","delete","options","patch"],sr="Can not add a route since the matcher is already built.",nr=class extends Error{},zr="__COMPOSED_HANDLER",qr=e=>e.text("404 Not Found",404),Nt=(e,t)=>{if("getResponse"in e){const r=e.getResponse();return t.newResponse(r.body,r)}return console.error(e),t.text("Internal Server Error",500)},J,N,ar,Y,me,Qe,et,Le,Br=(Le=class{constructor(t={}){b(this,N);x(this,"get");x(this,"post");x(this,"put");x(this,"delete");x(this,"options");x(this,"patch");x(this,"all");x(this,"on");x(this,"use");x(this,"router");x(this,"getPath");x(this,"_basePath","/");b(this,J,"/");x(this,"routes",[]);b(this,Y,qr);x(this,"errorHandler",Nt);x(this,"onError",t=>(this.errorHandler=t,this));x(this,"notFound",t=>(v(this,Y,t),this));x(this,"fetch",(t,...r)=>S(this,N,et).call(this,t,r[1],r[0],t.method));x(this,"request",(t,r,s,n)=>t instanceof Request?this.fetch(r?new Request(t,r):t,s,n):(t=t.toString(),this.fetch(new Request(/^https?:\/\//.test(t)?t:`http://localhost${Te("/",t)}`,r),s,n)));x(this,"fire",()=>{addEventListener("fetch",t=>{t.respondWith(S(this,N,et).call(this,t.request,t,void 0,t.request.method))})});[...Fr,Ir].forEach(a=>{this[a]=(i,...l)=>(typeof i=="string"?v(this,J,i):S(this,N,me).call(this,a,u(this,J),i),l.forEach(o=>{S(this,N,me).call(this,a,u(this,J),o)}),this)}),this.on=(a,i,...l)=>{for(const o of[i].flat()){v(this,J,o);for(const c of[a].flat())l.map(f=>{S(this,N,me).call(this,c.toUpperCase(),u(this,J),f)})}return this},this.use=(a,...i)=>(typeof a=="string"?v(this,J,a):(v(this,J,"*"),i.unshift(a)),i.forEach(l=>{S(this,N,me).call(this,k,u(this,J),l)}),this);const{strict:s,...n}=t;Object.assign(this,n),this.getPath=s??!0?t.getPath??Jt:$r}route(t,r){const s=this.basePath(t);return r.routes.map(n=>{var i;let a;r.errorHandler===Nt?a=n.handler:(a=async(l,o)=>(await Pt([],r.errorHandler)(l,()=>n.handler(l,o))).res,a[zr]=n.handler),S(i=s,N,me).call(i,n.method,n.path,a)}),this}basePath(t){const r=S(this,N,ar).call(this);return r._basePath=Te(this._basePath,t),r}mount(t,r,s){let n,a;s&&(typeof s=="function"?a=s:(a=s.optionHandler,s.replaceRequest===!1?n=o=>o:n=s.replaceRequest));const i=a?o=>{const c=a(o);return Array.isArray(c)?c:[c]}:o=>{let c;try{c=o.executionCtx}catch{}return[o.env,c]};n||(n=(()=>{const o=Te(this._basePath,t),c=o==="/"?0:o.length;return f=>{const h=new URL(f.url);return h.pathname=h.pathname.slice(c)||"/",new Request(h,f)}})());const l=async(o,c)=>{const f=await r(n(o.req.raw),...i(o));if(f)return f;await c()};return S(this,N,me).call(this,k,Te(t,"*"),l),this}},J=new WeakMap,N=new WeakSet,ar=function(){const t=new Le({router:this.router,getPath:this.getPath});return t.errorHandler=this.errorHandler,v(t,Y,u(this,Y)),t.routes=this.routes,t},Y=new WeakMap,me=function(t,r,s){t=t.toUpperCase(),r=Te(this._basePath,r);const n={basePath:this._basePath,path:r,method:t,handler:s};this.router.add(t,r,[s,n]),this.routes.push(n)},Qe=function(t,r){if(t instanceof Error)return this.errorHandler(t,r);throw t},et=function(t,r,s,n){if(n==="HEAD")return(async()=>new Response(null,await S(this,N,et).call(this,t,r,s,"GET")))();const a=this.getPath(t,{env:s}),i=this.router.match(n,a),l=new _r(t,{path:a,matchResult:i,env:s,executionCtx:r,notFoundHandler:u(this,Y)});if(i[0].length===1){let c;try{c=i[0][0][0][0](l,async()=>{l.res=await u(this,Y).call(this,l)})}catch(f){return S(this,N,Qe).call(this,f,l)}return c instanceof Promise?c.then(f=>f||(l.finalized?l.res:u(this,Y).call(this,l))).catch(f=>S(this,N,Qe).call(this,f,l)):c??u(this,Y).call(this,l)}const o=Pt(i[0],this.errorHandler,u(this,Y));return(async()=>{try{const c=await o(l);if(!c.finalized)throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");return c.res}catch(c){return S(this,N,Qe).call(this,c,l)}})()},Le),ir=[];function Wr(e,t){const r=this.buildAllMatchers(),s=((n,a)=>{const i=r[n]||r[k],l=i[2][a];if(l)return l;const o=a.match(i[0]);if(!o)return[[],ir];const c=o.indexOf("",1);return[i[1][c],o]});return this.match=s,s(e,t)}var rt="[^/]+",qe=".*",Be="(?:|/.*)",ke=Symbol(),Gr=new Set(".\\+*[^]$()");function Kr(e,t){return e.length===1?t.length===1?e<t?-1:1:-1:t.length===1||e===qe||e===Be?1:t===qe||t===Be?-1:e===rt?1:t===rt?-1:e.length===t.length?e<t?-1:1:t.length-e.length}var ye,be,Z,Se,Vr=(Se=class{constructor(){b(this,ye);b(this,be);b(this,Z,Object.create(null))}insert(t,r,s,n,a){if(t.length===0){if(u(this,ye)!==void 0)throw ke;if(a)return;v(this,ye,r);return}const[i,...l]=t,o=i==="*"?l.length===0?["","",qe]:["","",rt]:i==="/*"?["","",Be]:i.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);let c;if(o){const f=o[1];let h=o[2]||rt;if(f&&o[2]&&(h===".*"||(h=h.replace(/^\((?!\?:)(?=[^)]+\)$)/,"(?:"),/\((?!\?:)/.test(h))))throw ke;if(c=u(this,Z)[h],!c){if(Object.keys(u(this,Z)).some(d=>d!==qe&&d!==Be))throw ke;if(a)return;c=u(this,Z)[h]=new Se,f!==""&&v(c,be,n.varIndex++)}!a&&f!==""&&s.push([f,u(c,be)])}else if(c=u(this,Z)[i],!c){if(Object.keys(u(this,Z)).some(f=>f.length>1&&f!==qe&&f!==Be))throw ke;if(a)return;c=u(this,Z)[i]=new Se}c.insert(l,r,s,n,a)}buildRegExpStr(){const r=Object.keys(u(this,Z)).sort(Kr).map(s=>{const n=u(this,Z)[s];return(typeof u(n,be)=="number"?`(${s})@${u(n,be)}`:Gr.has(s)?`\\${s}`:s)+n.buildRegExpStr()});return typeof u(this,ye)=="number"&&r.unshift(`#${u(this,ye)}`),r.length===0?"":r.length===1?r[0]:"(?:"+r.join("|")+")"}},ye=new WeakMap,be=new WeakMap,Z=new WeakMap,Se),nt,Ze,Bt,Jr=(Bt=class{constructor(){b(this,nt,{varIndex:0});b(this,Ze,new Vr)}insert(e,t,r){const s=[],n=[];for(let i=0;;){let l=!1;if(e=e.replace(/\{[^}]+\}/g,o=>{const c=`@\\${i}`;return n[i]=[c,o],i++,l=!0,c}),!l)break}const a=e.match(/(?::[^\/]+)|(?:\/\*$)|./g)||[];for(let i=n.length-1;i>=0;i--){const[l]=n[i];for(let o=a.length-1;o>=0;o--)if(a[o].indexOf(l)!==-1){a[o]=a[o].replace(l,n[i][1]);break}}return u(this,Ze).insert(a,t,s,u(this,nt),r),s}buildRegExp(){let e=u(this,Ze).buildRegExpStr();if(e==="")return[/^$/,[],[]];let t=0;const r=[],s=[];return e=e.replace(/#(\d+)|@(\d+)|\.\*\$/g,(n,a,i)=>a!==void 0?(r[++t]=Number(a),"$()"):(i!==void 0&&(s[Number(i)]=++t),"")),[new RegExp(`^${e}`),r,s]}},nt=new WeakMap,Ze=new WeakMap,Bt),Yr=[/^$/,[],Object.create(null)],tt=Object.create(null);function or(e){return tt[e]??(tt[e]=new RegExp(e==="*"?"":`^${e.replace(/\/\*$|([.\\+*[^\]$()])/g,(t,r)=>r?`\\${r}`:"(?:|/.*)")}$`))}function Zr(){tt=Object.create(null)}function Xr(e){var c;const t=new Jr,r=[];if(e.length===0)return Yr;const s=e.map(f=>[!/\*|\/:/.test(f[0]),...f]).sort(([f,h],[d,p])=>f?1:d?-1:h.length-p.length),n=Object.create(null);for(let f=0,h=-1,d=s.length;f<d;f++){const[p,m,y]=s[f];p?n[m]=[y.map(([R])=>[R,Object.create(null)]),ir]:h++;let g;try{g=t.insert(m,h,p)}catch(R){throw R===ke?new nr(m):R}p||(r[h]=y.map(([R,C])=>{const P=Object.create(null);for(C-=1;C>=0;C--){const[j,A]=g[C];P[j]=A}return[R,P]}))}const[a,i,l]=t.buildRegExp();for(let f=0,h=r.length;f<h;f++)for(let d=0,p=r[f].length;d<p;d++){const m=(c=r[f][d])==null?void 0:c[1];if(!m)continue;const y=Object.keys(m);for(let g=0,R=y.length;g<R;g++)m[y[g]]=l[m[y[g]]]}const o=[];for(const f in i)o[f]=r[i[f]];return[a,o,n]}function Ce(e,t){if(e){for(const r of Object.keys(e).sort((s,n)=>n.length-s.length))if(or(r).test(t))return[...e[r]]}}var he,de,at,lr,Wt,Qr=(Wt=class{constructor(){b(this,at);x(this,"name","RegExpRouter");b(this,he);b(this,de);x(this,"match",Wr);v(this,he,{[k]:Object.create(null)}),v(this,de,{[k]:Object.create(null)})}add(e,t,r){var l;const s=u(this,he),n=u(this,de);if(!s||!n)throw new Error(sr);s[e]||[s,n].forEach(o=>{o[e]=Object.create(null),Object.keys(o[k]).forEach(c=>{o[e][c]=[...o[k][c]]})}),t==="/*"&&(t="*");const a=(t.match(/\/:/g)||[]).length;if(/\*$/.test(t)){const o=or(t);e===k?Object.keys(s).forEach(c=>{var f;(f=s[c])[t]||(f[t]=Ce(s[c],t)||Ce(s[k],t)||[])}):(l=s[e])[t]||(l[t]=Ce(s[e],t)||Ce(s[k],t)||[]),Object.keys(s).forEach(c=>{(e===k||e===c)&&Object.keys(s[c]).forEach(f=>{o.test(f)&&s[c][f].push([r,a])})}),Object.keys(n).forEach(c=>{(e===k||e===c)&&Object.keys(n[c]).forEach(f=>o.test(f)&&n[c][f].push([r,a]))});return}const i=Yt(t)||[t];for(let o=0,c=i.length;o<c;o++){const f=i[o];Object.keys(n).forEach(h=>{var d;(e===k||e===h)&&((d=n[h])[f]||(d[f]=[...Ce(s[h],f)||Ce(s[k],f)||[]]),n[h][f].push([r,a-c+o+1]))})}}buildAllMatchers(){const e=Object.create(null);return Object.keys(u(this,de)).concat(Object.keys(u(this,he))).forEach(t=>{e[t]||(e[t]=S(this,at,lr).call(this,t))}),v(this,he,v(this,de,void 0)),Zr(),e}},he=new WeakMap,de=new WeakMap,at=new WeakSet,lr=function(e){const t=[];let r=e===k;return[u(this,he),u(this,de)].forEach(s=>{const n=s[e]?Object.keys(s[e]).map(a=>[a,s[e][a]]):[];n.length!==0?(r||(r=!0),t.push(...n)):e!==k&&t.push(...Object.keys(s[k]).map(a=>[a,s[k][a]]))}),r?Xr(t):null},Wt),pe,ae,Gt,es=(Gt=class{constructor(e){x(this,"name","SmartRouter");b(this,pe,[]);b(this,ae,[]);v(this,pe,e.routers)}add(e,t,r){if(!u(this,ae))throw new Error(sr);u(this,ae).push([e,t,r])}match(e,t){if(!u(this,ae))throw new Error("Fatal error");const r=u(this,pe),s=u(this,ae),n=r.length;let a=0,i;for(;a<n;a++){const l=r[a];try{for(let o=0,c=s.length;o<c;o++)l.add(...s[o]);i=l.match(e,t)}catch(o){if(o instanceof nr)continue;throw o}this.match=l.match.bind(l),v(this,pe,[l]),v(this,ae,void 0);break}if(a===n)throw new Error("Fatal error");return this.name=`SmartRouter + ${this.activeRouter.name}`,i}get activeRouter(){if(u(this,ae)||u(this,pe).length!==1)throw new Error("No active router has been determined yet.");return u(this,pe)[0]}},pe=new WeakMap,ae=new WeakMap,Gt),Ie=Object.create(null),ge,_,Ee,Me,L,ie,xe,De,ts=(De=class{constructor(t,r,s){b(this,ie);b(this,ge);b(this,_);b(this,Ee);b(this,Me,0);b(this,L,Ie);if(v(this,_,s||Object.create(null)),v(this,ge,[]),t&&r){const n=Object.create(null);n[t]={handler:r,possibleKeys:[],score:0},v(this,ge,[n])}v(this,Ee,[])}insert(t,r,s){v(this,Me,++Tt(this,Me)._);let n=this;const a=Tr(r),i=[];for(let l=0,o=a.length;l<o;l++){const c=a[l],f=a[l+1],h=Nr(c,f),d=Array.isArray(h)?h[0]:c;if(d in u(n,_)){n=u(n,_)[d],h&&i.push(h[1]);continue}u(n,_)[d]=new De,h&&(u(n,Ee).push(h),i.push(h[1])),n=u(n,_)[d]}return u(n,ge).push({[t]:{handler:s,possibleKeys:i.filter((l,o,c)=>c.indexOf(l)===o),score:u(this,Me)}}),n}search(t,r){var o;const s=[];v(this,L,Ie);let a=[this];const i=Vt(r),l=[];for(let c=0,f=i.length;c<f;c++){const h=i[c],d=c===f-1,p=[];for(let m=0,y=a.length;m<y;m++){const g=a[m],R=u(g,_)[h];R&&(v(R,L,u(g,L)),d?(u(R,_)["*"]&&s.push(...S(this,ie,xe).call(this,u(R,_)["*"],t,u(g,L))),s.push(...S(this,ie,xe).call(this,R,t,u(g,L)))):p.push(R));for(let C=0,P=u(g,Ee).length;C<P;C++){const j=u(g,Ee)[C],A=u(g,L)===Ie?{}:{...u(g,L)};if(j==="*"){const z=u(g,_)["*"];z&&(s.push(...S(this,ie,xe).call(this,z,t,u(g,L))),v(z,L,A),p.push(z));continue}const[U,T,E]=j;if(!h&&!(E instanceof RegExp))continue;const w=u(g,_)[U],F=i.slice(c).join("/");if(E instanceof RegExp){const z=E.exec(F);if(z){if(A[T]=z[0],s.push(...S(this,ie,xe).call(this,w,t,u(g,L),A)),Object.keys(u(w,_)).length){v(w,L,A);const $=((o=z[0].match(/\//))==null?void 0:o.length)??0;(l[$]||(l[$]=[])).push(w)}continue}}(E===!0||E.test(h))&&(A[T]=h,d?(s.push(...S(this,ie,xe).call(this,w,t,A,u(g,L))),u(w,_)["*"]&&s.push(...S(this,ie,xe).call(this,u(w,_)["*"],t,A,u(g,L)))):(v(w,L,A),p.push(w)))}}a=p.concat(l.shift()??[])}return s.length>1&&s.sort((c,f)=>c.score-f.score),[s.map(({handler:c,params:f})=>[c,f])]}},ge=new WeakMap,_=new WeakMap,Ee=new WeakMap,Me=new WeakMap,L=new WeakMap,ie=new WeakSet,xe=function(t,r,s,n){const a=[];for(let i=0,l=u(t,ge).length;i<l;i++){const o=u(t,ge)[i],c=o[r]||o[k],f={};if(c!==void 0&&(c.params=Object.create(null),a.push(c),s!==Ie||n&&n!==Ie))for(let h=0,d=c.possibleKeys.length;h<d;h++){const p=c.possibleKeys[h],m=f[c.score];c.params[p]=n!=null&&n[p]&&!m?n[p]:s[p]??(n==null?void 0:n[p]),f[c.score]=!0}}return a},De),Re,Kt,rs=(Kt=class{constructor(){x(this,"name","TrieRouter");b(this,Re);v(this,Re,new ts)}add(e,t,r){const s=Yt(t);if(s){for(let n=0,a=s.length;n<a;n++)u(this,Re).insert(e,s[n],r);return}u(this,Re).insert(e,t,r)}match(e,t){return u(this,Re).search(e,t)}},Re=new WeakMap,Kt),cr=class extends Br{constructor(e={}){super(e),this.router=e.router??new es({routers:[new Qr,new rs]})}},ss=e=>{const r={...{origin:"*",allowMethods:["GET","HEAD","PUT","POST","DELETE","PATCH"],allowHeaders:[],exposeHeaders:[]},...e},s=(a=>typeof a=="string"?a==="*"?()=>a:i=>a===i?i:null:typeof a=="function"?a:i=>a.includes(i)?i:null)(r.origin),n=(a=>typeof a=="function"?a:Array.isArray(a)?()=>a:()=>[])(r.allowMethods);return async function(i,l){var f;function o(h,d){i.res.headers.set(h,d)}const c=await s(i.req.header("origin")||"",i);if(c&&o("Access-Control-Allow-Origin",c),r.credentials&&o("Access-Control-Allow-Credentials","true"),(f=r.exposeHeaders)!=null&&f.length&&o("Access-Control-Expose-Headers",r.exposeHeaders.join(",")),i.req.method==="OPTIONS"){r.origin!=="*"&&o("Vary","Origin"),r.maxAge!=null&&o("Access-Control-Max-Age",r.maxAge.toString());const h=await n(i.req.header("origin")||"",i);h.length&&o("Access-Control-Allow-Methods",h.join(","));let d=r.allowHeaders;if(!(d!=null&&d.length)){const p=i.req.header("Access-Control-Request-Headers");p&&(d=p.split(/\s*,\s*/))}return d!=null&&d.length&&(o("Access-Control-Allow-Headers",d.join(",")),i.res.headers.append("Vary","Access-Control-Request-Headers")),i.res.headers.delete("Content-Length"),i.res.headers.delete("Content-Type"),new Response(null,{headers:i.res.headers,status:204,statusText:"No Content"})}await l(),r.origin!=="*"&&i.header("Vary","Origin",{append:!0})}},ns=/^\s*(?:text\/(?!event-stream(?:[;\s]|$))[^;\s]+|application\/(?:javascript|json|xml|xml-dtd|ecmascript|dart|postscript|rtf|tar|toml|vnd\.dart|vnd\.ms-fontobject|vnd\.ms-opentype|wasm|x-httpd-php|x-javascript|x-ns-proxy-autoconfig|x-sh|x-tar|x-virtualbox-hdd|x-virtualbox-ova|x-virtualbox-ovf|x-virtualbox-vbox|x-virtualbox-vdi|x-virtualbox-vhd|x-virtualbox-vmdk|x-www-form-urlencoded)|font\/(?:otf|ttf)|image\/(?:bmp|vnd\.adobe\.photoshop|vnd\.microsoft\.icon|vnd\.ms-dds|x-icon|x-ms-bmp)|message\/rfc822|model\/gltf-binary|x-shader\/x-fragment|x-shader\/x-vertex|[^;\s]+?\+(?:json|text|xml|yaml))(?:[;\s]|$)/i,Ut=(e,t=is)=>{const r=/\.([a-zA-Z0-9]+?)$/,s=e.match(r);if(!s)return;let n=t[s[1]];return n&&n.startsWith("text")&&(n+="; charset=utf-8"),n},as={aac:"audio/aac",avi:"video/x-msvideo",avif:"image/avif",av1:"video/av1",bin:"application/octet-stream",bmp:"image/bmp",css:"text/css",csv:"text/csv",eot:"application/vnd.ms-fontobject",epub:"application/epub+zip",gif:"image/gif",gz:"application/gzip",htm:"text/html",html:"text/html",ico:"image/x-icon",ics:"text/calendar",jpeg:"image/jpeg",jpg:"image/jpeg",js:"text/javascript",json:"application/json",jsonld:"application/ld+json",map:"application/json",mid:"audio/x-midi",midi:"audio/x-midi",mjs:"text/javascript",mp3:"audio/mpeg",mp4:"video/mp4",mpeg:"video/mpeg",oga:"audio/ogg",ogv:"video/ogg",ogx:"application/ogg",opus:"audio/opus",otf:"font/otf",pdf:"application/pdf",png:"image/png",rtf:"application/rtf",svg:"image/svg+xml",tif:"image/tiff",tiff:"image/tiff",ts:"video/mp2t",ttf:"font/ttf",txt:"text/plain",wasm:"application/wasm",webm:"video/webm",weba:"audio/webm",webmanifest:"application/manifest+json",webp:"image/webp",woff:"font/woff",woff2:"font/woff2",xhtml:"application/xhtml+xml",xml:"application/xml",zip:"application/zip","3gp":"video/3gpp","3g2":"video/3gpp2",gltf:"model/gltf+json",glb:"model/gltf-binary"},is=as,os=(...e)=>{let t=e.filter(n=>n!=="").join("/");t=t.replace(new RegExp("(?<=\\/)\\/+","g"),"");const r=t.split("/"),s=[];for(const n of r)n===".."&&s.length>0&&s.at(-1)!==".."?s.pop():n!=="."&&s.push(n);return s.join("/")||"."},fr={br:".br",zstd:".zst",gzip:".gz"},ls=Object.keys(fr),cs="index.html",fs=e=>{const t=e.root??"./",r=e.path,s=e.join??os;return async(n,a)=>{var f,h,d,p;if(n.finalized)return a();let i;if(e.path)i=e.path;else try{if(i=decodeURIComponent(n.req.path),/(?:^|[\/\\])\.\.(?:$|[\/\\])/.test(i))throw new Error}catch{return await((f=e.onNotFound)==null?void 0:f.call(e,n.req.path,n)),a()}let l=s(t,!r&&e.rewriteRequestPath?e.rewriteRequestPath(i):i);e.isDir&&await e.isDir(l)&&(l=s(l,cs));const o=e.getContent;let c=await o(l,n);if(c instanceof Response)return n.newResponse(c.body,c);if(c){const m=e.mimes&&Ut(l,e.mimes)||Ut(l);if(n.header("Content-Type",m||"application/octet-stream"),e.precompressed&&(!m||ns.test(m))){const y=new Set((h=n.req.header("Accept-Encoding"))==null?void 0:h.split(",").map(g=>g.trim()));for(const g of ls){if(!y.has(g))continue;const R=await o(l+fr[g],n);if(R){c=R,n.header("Content-Encoding",g),n.header("Vary","Accept-Encoding",{append:!0});break}}}return await((d=e.onFound)==null?void 0:d.call(e,l,n)),n.body(c)}await((p=e.onNotFound)==null?void 0:p.call(e,l,n)),await a()}},us=async(e,t)=>{let r;t&&t.manifest?typeof t.manifest=="string"?r=JSON.parse(t.manifest):r=t.manifest:typeof __STATIC_CONTENT_MANIFEST=="string"?r=JSON.parse(__STATIC_CONTENT_MANIFEST):r=__STATIC_CONTENT_MANIFEST;let s;t&&t.namespace?s=t.namespace:s=__STATIC_CONTENT;const n=r[e]||e;if(!n)return null;const a=await s.get(n,{type:"stream"});return a||null},hs=e=>async function(r,s){return fs({...e,getContent:async a=>us(a,{manifest:e.manifest,namespace:e.namespace?e.namespace:r.env?r.env.__STATIC_CONTENT:void 0})})(r,s)},ds=e=>hs(e),I=Uint8Array,B=Uint16Array,bt=Int32Array,Et=new I([0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0,0]),Rt=new I([0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,0,0]),$t=new I([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]),ur=function(e,t){for(var r=new B(31),s=0;s<31;++s)r[s]=t+=1<<e[s-1];for(var n=new bt(r[30]),s=1;s<30;++s)for(var a=r[s];a<r[s+1];++a)n[a]=a-r[s]<<5|s;return{b:r,r:n}},hr=ur(Et,2),ps=hr.b,vt=hr.r;ps[28]=258,vt[258]=28;var gs=ur(Rt,0),Ht=gs.r,mt=new B(32768);for(var O=0;O<32768;++O){var ce=(O&43690)>>1|(O&21845)<<1;ce=(ce&52428)>>2|(ce&13107)<<2,ce=(ce&61680)>>4|(ce&3855)<<4,mt[O]=((ce&65280)>>8|(ce&255)<<8)>>1}var We=(function(e,t,r){for(var s=e.length,n=0,a=new B(t);n<s;++n)e[n]&&++a[e[n]-1];var i=new B(t);for(n=1;n<t;++n)i[n]=i[n-1]+a[n-1]<<1;var l;if(r){l=new B(1<<t);var o=15-t;for(n=0;n<s;++n)if(e[n])for(var c=n<<4|e[n],f=t-e[n],h=i[e[n]-1]++<<f,d=h|(1<<f)-1;h<=d;++h)l[mt[h]>>o]=c}else for(l=new B(s),n=0;n<s;++n)e[n]&&(l[n]=mt[i[e[n]-1]++]>>15-e[n]);return l}),je=new I(288);for(var O=0;O<144;++O)je[O]=8;for(var O=144;O<256;++O)je[O]=9;for(var O=256;O<280;++O)je[O]=7;for(var O=280;O<288;++O)je[O]=8;var st=new I(32);for(var O=0;O<32;++O)st[O]=5;var vs=We(je,9,0),ms=We(st,5,0),dr=function(e){return(e+7)/8|0},pr=function(e,t,r){return(r==null||r>e.length)&&(r=e.length),new I(e.subarray(t,r))},xs=["unexpected EOF","invalid block type","invalid length/literal","invalid distance","stream finished","no stream handler",,"no callback","invalid UTF-8 data","extra field too long","date not in range 1980-2099","filename too long","stream finishing","invalid zip data"],it=function(e,t,r){var s=new Error(t||xs[e]);if(s.code=e,Error.captureStackTrace&&Error.captureStackTrace(s,it),!r)throw s;return s},re=function(e,t,r){r<<=t&7;var s=t/8|0;e[s]|=r,e[s+1]|=r>>8},Fe=function(e,t,r){r<<=t&7;var s=t/8|0;e[s]|=r,e[s+1]|=r>>8,e[s+2]|=r>>16},pt=function(e,t){for(var r=[],s=0;s<e.length;++s)e[s]&&r.push({s,f:e[s]});var n=r.length,a=r.slice();if(!n)return{t:vr,l:0};if(n==1){var i=new I(r[0].s+1);return i[r[0].s]=1,{t:i,l:1}}r.sort(function(A,U){return A.f-U.f}),r.push({s:-1,f:25001});var l=r[0],o=r[1],c=0,f=1,h=2;for(r[0]={s:-1,f:l.f+o.f,l,r:o};f!=n-1;)l=r[r[c].f<r[h].f?c++:h++],o=r[c!=f&&r[c].f<r[h].f?c++:h++],r[f++]={s:-1,f:l.f+o.f,l,r:o};for(var d=a[0].s,s=1;s<n;++s)a[s].s>d&&(d=a[s].s);var p=new B(d+1),m=xt(r[f-1],p,0);if(m>t){var s=0,y=0,g=m-t,R=1<<g;for(a.sort(function(U,T){return p[T.s]-p[U.s]||U.f-T.f});s<n;++s){var C=a[s].s;if(p[C]>t)y+=R-(1<<m-p[C]),p[C]=t;else break}for(y>>=g;y>0;){var P=a[s].s;p[P]<t?y-=1<<t-p[P]++-1:++s}for(;s>=0&&y;--s){var j=a[s].s;p[j]==t&&(--p[j],++y)}m=t}return{t:new I(p),l:m}},xt=function(e,t,r){return e.s==-1?Math.max(xt(e.l,t,r+1),xt(e.r,t,r+1)):t[e.s]=r},Lt=function(e){for(var t=e.length;t&&!e[--t];);for(var r=new B(++t),s=0,n=e[0],a=1,i=function(o){r[s++]=o},l=1;l<=t;++l)if(e[l]==n&&l!=t)++a;else{if(!n&&a>2){for(;a>138;a-=138)i(32754);a>2&&(i(a>10?a-11<<5|28690:a-3<<5|12305),a=0)}else if(a>3){for(i(n),--a;a>6;a-=6)i(8304);a>2&&(i(a-3<<5|8208),a=0)}for(;a--;)i(n);a=1,n=e[l]}return{c:r.subarray(0,s),n:t}},ze=function(e,t){for(var r=0,s=0;s<t.length;++s)r+=e[s]*t[s];return r},gr=function(e,t,r){var s=r.length,n=dr(t+2);e[n]=s&255,e[n+1]=s>>8,e[n+2]=e[n]^255,e[n+3]=e[n+1]^255;for(var a=0;a<s;++a)e[n+a+4]=r[a];return(n+4+s)*8},Mt=function(e,t,r,s,n,a,i,l,o,c,f){re(t,f++,r),++n[256];for(var h=pt(n,15),d=h.t,p=h.l,m=pt(a,15),y=m.t,g=m.l,R=Lt(d),C=R.c,P=R.n,j=Lt(y),A=j.c,U=j.n,T=new B(19),E=0;E<C.length;++E)++T[C[E]&31];for(var E=0;E<A.length;++E)++T[A[E]&31];for(var w=pt(T,7),F=w.t,z=w.l,$=19;$>4&&!F[$t[$-1]];--$);var ve=c+5<<3,G=ze(n,je)+ze(a,st)+i,K=ze(n,d)+ze(a,y)+i+14+3*$+ze(T,F)+2*T[16]+3*T[17]+7*T[18];if(o>=0&&ve<=G&&ve<=K)return gr(t,f,e.subarray(o,o+c));var Q,H,V,le;if(re(t,f,1+(K<G)),f+=2,K<G){Q=We(d,p,0),H=d,V=We(y,g,0),le=y;var ot=We(F,z,0);re(t,f,P-257),re(t,f+5,U-1),re(t,f+10,$-4),f+=14;for(var E=0;E<$;++E)re(t,f+3*E,F[$t[E]]);f+=3*$;for(var ee=[C,A],_e=0;_e<2;++_e)for(var Ae=ee[_e],E=0;E<Ae.length;++E){var te=Ae[E]&31;re(t,f,ot[te]),f+=F[te],te>15&&(re(t,f,Ae[E]>>5&127),f+=Ae[E]>>12)}}else Q=vs,H=je,V=ms,le=st;for(var E=0;E<l;++E){var D=s[E];if(D>255){var te=D>>18&31;Fe(t,f,Q[te+257]),f+=H[te+257],te>7&&(re(t,f,D>>23&31),f+=Et[te]);var Oe=D&31;Fe(t,f,V[Oe]),f+=le[Oe],Oe>3&&(Fe(t,f,D>>5&8191),f+=Rt[Oe])}else Fe(t,f,Q[D]),f+=H[D]}return Fe(t,f,Q[256]),f+H[256]},ws=new bt([65540,131080,131088,131104,262176,1048704,1048832,2114560,2117632]),vr=new I(0),ys=function(e,t,r,s,n,a){var i=a.z||e.length,l=new I(s+i+5*(1+Math.ceil(i/7e3))+n),o=l.subarray(s,l.length-n),c=a.l,f=(a.r||0)&7;if(t){f&&(o[0]=a.r>>3);for(var h=ws[t-1],d=h>>13,p=h&8191,m=(1<<r)-1,y=a.p||new B(32768),g=a.h||new B(m+1),R=Math.ceil(r/3),C=2*R,P=function(ft){return(e[ft]^e[ft+1]<<R^e[ft+2]<<C)&m},j=new bt(25e3),A=new B(288),U=new B(32),T=0,E=0,w=a.i||0,F=0,z=a.w||0,$=0;w+2<i;++w){var ve=P(w),G=w&32767,K=g[ve];if(y[G]=K,g[ve]=G,z<=w){var Q=i-w;if((T>7e3||F>24576)&&(Q>423||!c)){f=Mt(e,o,0,j,A,U,E,F,$,w-$,f),F=T=E=0,$=w;for(var H=0;H<286;++H)A[H]=0;for(var H=0;H<30;++H)U[H]=0}var V=2,le=0,ot=p,ee=G-K&32767;if(Q>2&&ve==P(w-ee))for(var _e=Math.min(d,Q)-1,Ae=Math.min(32767,w),te=Math.min(258,Q);ee<=Ae&&--ot&&G!=K;){if(e[w+V]==e[w+V-ee]){for(var D=0;D<te&&e[w+D]==e[w+D-ee];++D);if(D>V){if(V=D,le=ee,D>_e)break;for(var Oe=Math.min(ee,D-2),St=0,H=0;H<Oe;++H){var lt=w-ee+H&32767,yr=y[lt],jt=lt-yr&32767;jt>St&&(St=jt,K=lt)}}}G=K,K=y[G],ee+=G-K&32767}if(le){j[F++]=268435456|vt[V]<<18|Ht[le];var At=vt[V]&31,Ot=Ht[le]&31;E+=Et[At]+Rt[Ot],++A[257+At],++U[Ot],z=w+V,++T}else j[F++]=e[w],++A[e[w]]}}for(w=Math.max(w,z);w<i;++w)j[F++]=e[w],++A[e[w]];f=Mt(e,o,c,j,A,U,E,F,$,w-$,f),c||(a.r=f&7|o[f/8|0]<<3,f-=7,a.h=g,a.p=y,a.i=w,a.w=z)}else{for(var w=a.w||0;w<i+c;w+=65535){var ct=w+65535;ct>=i&&(o[f/8|0]=c,ct=i),f=gr(o,f+1,e.subarray(w,ct))}a.i=i}return pr(l,0,s+dr(f)+n)},bs=(function(){for(var e=new Int32Array(256),t=0;t<256;++t){for(var r=t,s=9;--s;)r=(r&1&&-306674912)^r>>>1;e[t]=r}return e})(),Es=function(){var e=-1;return{p:function(t){for(var r=e,s=0;s<t.length;++s)r=bs[r&255^t[s]]^r>>>8;e=r},d:function(){return~e}}},Rs=function(e,t,r,s,n){if(!n&&(n={l:1},t.dictionary)){var a=t.dictionary.subarray(-32768),i=new I(a.length+e.length);i.set(a),i.set(e,a.length),e=i,n.w=a.length}return ys(e,t.level==null?6:t.level,t.mem==null?n.l?Math.ceil(Math.max(8,Math.min(13,Math.log(e.length)))*1.5):20:12+t.mem,r,s,n)},mr=function(e,t){var r={};for(var s in e)r[s]=e[s];for(var s in t)r[s]=t[s];return r},M=function(e,t,r){for(;r;++t)e[t]=r,r>>>=8};function Ss(e,t){return Rs(e,t||{},0,0)}var xr=function(e,t,r,s){for(var n in e){var a=e[n],i=t+n,l=s;Array.isArray(a)&&(l=mr(s,a[1]),a=a[0]),a instanceof I?r[i]=[a,l]:(r[i+="/"]=[new I(0),l],xr(a,i,r,s))}},Dt=typeof TextEncoder<"u"&&new TextEncoder,js=typeof TextDecoder<"u"&&new TextDecoder,As=0;try{js.decode(vr,{stream:!0}),As=1}catch{}function _t(e,t){var r;if(Dt)return Dt.encode(e);for(var s=e.length,n=new I(e.length+(e.length>>1)),a=0,i=function(c){n[a++]=c},r=0;r<s;++r){if(a+5>n.length){var l=new I(a+8+(s-r<<1));l.set(n),n=l}var o=e.charCodeAt(r);o<128||t?i(o):o<2048?(i(192|o>>6),i(128|o&63)):o>55295&&o<57344?(o=65536+(o&1047552)|e.charCodeAt(++r)&1023,i(240|o>>18),i(128|o>>12&63),i(128|o>>6&63),i(128|o&63)):(i(224|o>>12),i(128|o>>6&63),i(128|o&63))}return pr(n,0,a)}var wt=function(e){var t=0;if(e)for(var r in e){var s=e[r].length;s>65535&&it(9),t+=s+4}return t},It=function(e,t,r,s,n,a,i,l){var o=s.length,c=r.extra,f=l&&l.length,h=wt(c);M(e,t,i!=null?33639248:67324752),t+=4,i!=null&&(e[t++]=20,e[t++]=r.os),e[t]=20,t+=2,e[t++]=r.flag<<1|(a<0&&8),e[t++]=n&&8,e[t++]=r.compression&255,e[t++]=r.compression>>8;var d=new Date(r.mtime==null?Date.now():r.mtime),p=d.getFullYear()-1980;if((p<0||p>119)&&it(10),M(e,t,p<<25|d.getMonth()+1<<21|d.getDate()<<16|d.getHours()<<11|d.getMinutes()<<5|d.getSeconds()>>1),t+=4,a!=-1&&(M(e,t,r.crc),M(e,t+4,a<0?-a-2:a),M(e,t+8,r.size)),M(e,t+12,o),M(e,t+14,h),t+=16,i!=null&&(M(e,t,f),M(e,t+6,r.attrs),M(e,t+10,i),t+=14),e.set(s,t),t+=o,h)for(var m in c){var y=c[m],g=y.length;M(e,t,+m),M(e,t+2,g),e.set(y,t+4),t+=4+g}return f&&(e.set(l,t),t+=f),t},Os=function(e,t,r,s,n){M(e,t,101010256),M(e,t+8,r),M(e,t+10,r),M(e,t+12,s),M(e,t+16,n)};function Cs(e,t){t||(t={});var r={},s=[];xr(e,"",r,t);var n=0,a=0;for(var i in r){var l=r[i],o=l[0],c=l[1],f=c.level==0?0:8,h=_t(i),d=h.length,p=c.comment,m=p&&_t(p),y=m&&m.length,g=wt(c.extra);d>65535&&it(11);var R=f?Ss(o,c):o,C=R.length,P=Es();P.p(o),s.push(mr(c,{size:o.length,crc:P.d(),c:R,f:h,m,u:d!=i.length||m&&p.length!=y,o:n,compression:f})),n+=30+d+g+C,a+=76+2*(d+g)+(y||0)+C}for(var j=new I(a+22),A=n,U=a-n,T=0;T<s.length;++T){var h=s[T];It(j,h.o,h,h.f,h.u,h.c.length);var E=30+h.f.length+wt(h.extra);j.set(h.c,h.o+E),It(j,n,h,h.f,h.u,h.c.length,h.o,h.m),n+=16+E+(h.m?h.m.length:0)}return Os(j,n,s.length,U,A),j}const X=new cr;X.use("/api/*",ss());X.use("/static/*",ds({root:"./public"}));X.get("/",e=>e.html(`
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { serveStatic } from 'hono/cloudflare-workers';
+import { zipSync } from 'fflate';
+
+const app = new Hono();
+app.use("/api/*", cors());
+app.use("/static/*", serveStatic({ root: "./public" }));
+app.get("/", (c) => {
+  return c.html(`
     <!DOCTYPE html>
     <html lang="ko">
     <head>
@@ -172,14 +181,25 @@ var br=Object.defineProperty;var Ct=e=>{throw TypeError(e)};var Er=(e,t,r)=>t in
                 </div>
 
                 <!-- 실행 버튼 -->
-                <button 
-                    id="startBtn" 
-                    onclick="startScreenshots()"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center text-lg shadow-lg"
-                >
-                    <i class="fas fa-play-circle mr-3 text-xl"></i>
-                    스크린샷 생성 시작
-                </button>
+                <div class="flex gap-4">
+                    <button 
+                        id="startBtn" 
+                        onclick="startScreenshots()"
+                        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center text-lg shadow-lg"
+                    >
+                        <i class="fas fa-play-circle mr-3 text-xl"></i>
+                        스크린샷 생성 시작
+                    </button>
+                    <button 
+                        id="resetBtn" 
+                        onclick="resetAll()"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center text-lg shadow-lg"
+                        title="모든 입력과 결과 초기화"
+                    >
+                        <i class="fas fa-redo mr-2 text-xl"></i>
+                        초기화
+                    </button>
+                </div>
 
                 <!-- 진행 상태 -->
                 <div id="progressSection" class="mt-8 hidden">
@@ -256,4 +276,376 @@ var br=Object.defineProperty;var Ct=e=>{throw TypeError(e)};var Er=(e,t,r)=>t in
         <script src="/static/app.js"><\/script>
     </body>
     </html>
-  `));X.post("/api/screenshot",async e=>{var t,r;try{const{url:s,width:n=1920,format:a="png",fullPage:i=!0}=await e.req.json();if(!s)return e.json({error:"URL이 필요합니다"},400);const l="https://api.microlink.io",o=new URLSearchParams({url:s,screenshot:"true",meta:"false",viewport:JSON.stringify({width:n,height:1080}),fullPage:i.toString(),type:a}),c=await fetch(`${l}?${o.toString()}`);if(!c.ok)throw new Error(`스크린샷 API 오류: ${c.status}`);const f=await c.json();if(f.status!=="success"||!((r=(t=f.data)==null?void 0:t.screenshot)!=null&&r.url))throw new Error("스크린샷 URL을 가져올 수 없습니다");const h=await fetch(f.data.screenshot.url);if(!h.ok)throw new Error("스크린샷 이미지를 다운로드할 수 없습니다");const d=await h.arrayBuffer(),p=`screenshots/${Date.now()}-${Math.random().toString(36).substring(7)}.${a}`,{env:m}=e;return m.SCREENSHOTS&&await m.SCREENSHOTS.put(p,d,{httpMetadata:{contentType:`image/${a}`}}),e.json({success:!0,url:s,fileName:p,size:d.byteLength,timestamp:new Date().toISOString()})}catch(s){return console.error("스크린샷 생성 오류:",s),e.json({error:"스크린샷 생성 중 오류가 발생했습니다",details:s instanceof Error?s.message:String(s)},500)}});X.post("/api/analyze",async e=>{try{const{url:t}=await e.req.json();if(!t)return e.json({error:"URL이 필요합니다"},400);const s=new URL(t).origin,n=["/","/about","/contact","/faq","/login","/signup","/register","/settings","/profile","/dashboard","/courses","/courses/major","/courses/general","/subjects","/schedule","/requirements","/requirements/master","/requirements/doctoral","/graduation","/thesis","/credits","/papers","/papers/international-conference","/papers/domestic-conference","/papers/international-journal","/papers/domestic-journal","/products","/services","/pricing","/features","/blog","/news","/events","/gallery","/portfolio","/team","/careers","/support","/docs","/documentation","/api","/terms","/privacy","/sitemap"],a=[],i=[];for(const c of n){const f=`${s}${c}`;i.push(fetch(f,{method:"HEAD",headers:{"User-Agent":"Mozilla/5.0"}}).then(h=>h.ok?f:null).catch(()=>null))}const l=await Promise.all(i);for(const c of l)c&&a.push(c);const o=Array.from(new Set(a)).sort();return e.json({success:!0,baseUrl:t,foundUrls:o,count:o.length})}catch(t){return console.error("사이트 분석 오류:",t),e.json({error:"사이트 분석 중 오류가 발생했습니다",details:t instanceof Error?t.message:String(t)},500)}});X.post("/api/crawl",async e=>{var t;try{const{url:r,maxPages:s=20,maxDepth:n=2}=await e.req.json();if(!r)return e.json({error:"URL이 필요합니다"},400);const i=new URL(r).hostname,l=new Set,o=[{url:r,depth:0}],c=[];for(;o.length>0&&c.length<s;){const f=o.shift();if(!f)break;const h=f.url,d=f.depth;if(!(l.has(h)||d>n)){l.add(h),c.push(h);try{const p="https://api.microlink.io",m=new URLSearchParams({url:h,meta:"false",data:"links"}),y=await fetch(`${p}?${m.toString()}`);if(y.ok){const g=await y.json();if(g.status==="success"&&((t=g.data)!=null&&t.links)){const R=g.data.links;for(const C of R)try{const P=C.href;if(!P)continue;const j=new URL(P,h).href;new URL(j).hostname===i&&!l.has(j)&&!o.some(U=>U.url===j)&&!j.includes("#")&&!j.match(/\.(pdf|jpg|jpeg|png|gif|zip|rar|exe|dmg)$/i)&&o.push({url:j,depth:d+1})}catch{}}}}catch(p){console.error(`크롤링 오류 (${h}):`,p)}}}return e.json({success:!0,baseUrl:r,foundUrls:c,count:c.length,maxPages:s,maxDepth:n})}catch(r){return console.error("크롤링 오류:",r),e.json({error:"크롤링 중 오류가 발생했습니다",details:r instanceof Error?r.message:String(r)},500)}});X.post("/api/screenshots/batch",async e=>{var t,r;try{const{urls:s,width:n=1920,format:a="png",fullPage:i=!0}=await e.req.json();if(!s||!Array.isArray(s)||s.length===0)return e.json({error:"URL 목록이 필요합니다"},400);const l=[];for(const o of s)try{const c="https://api.microlink.io",f=new URLSearchParams({url:o,screenshot:"true",meta:"false",viewport:JSON.stringify({width:n,height:1080}),fullPage:i.toString(),type:a}),h=await fetch(`${c}?${f.toString()}`);if(h.ok){const d=await h.json();if(d.status==="success"&&((r=(t=d.data)==null?void 0:t.screenshot)!=null&&r.url)){const m=await(await fetch(d.data.screenshot.url)).arrayBuffer(),y=`screenshots/${Date.now()}-${Math.random().toString(36).substring(7)}.${a}`,{env:g}=e;g.SCREENSHOTS&&await g.SCREENSHOTS.put(y,m,{httpMetadata:{contentType:`image/${a}`}}),l.push({success:!0,url:o,fileName:y,size:m.byteLength})}else l.push({success:!1,url:o,error:"스크린샷 URL을 가져올 수 없습니다"})}else l.push({success:!1,url:o,error:`API 오류: ${h.status}`})}catch(c){l.push({success:!1,url:o,error:c instanceof Error?c.message:String(c)})}return e.json({success:!0,total:s.length,succeeded:l.filter(o=>o.success).length,failed:l.filter(o=>!o.success).length,results:l})}catch(s){return console.error("일괄 스크린샷 생성 오류:",s),e.json({error:"일괄 스크린샷 생성 중 오류가 발생했습니다",details:s instanceof Error?s.message:String(s)},500)}});X.get("/api/screenshot/:fileName",async e=>{var t;try{const r=e.req.param("fileName"),{env:s}=e;if(!s.SCREENSHOTS)return e.json({error:"R2 bucket이 설정되지 않았습니다"},500);const n=await s.SCREENSHOTS.get(`screenshots/${r}`);return n?new Response(n.body,{headers:{"Content-Type":((t=n.httpMetadata)==null?void 0:t.contentType)||"image/png","Cache-Control":"public, max-age=31536000"}}):e.notFound()}catch(r){return console.error("스크린샷 조회 오류:",r),e.json({error:"스크린샷을 불러올 수 없습니다"},500)}});X.get("/api/screenshots",async e=>{try{const{env:t}=e;if(!t.SCREENSHOTS)return e.json({error:"R2 bucket이 설정되지 않았습니다"},500);const s=(await t.SCREENSHOTS.list({prefix:"screenshots/"})).objects.map(n=>({key:n.key,fileName:n.key.replace("screenshots/",""),size:n.size,uploaded:n.uploaded}));return e.json({success:!0,count:s.length,screenshots:s})}catch(t){return console.error("스크린샷 목록 조회 오류:",t),e.json({error:"스크린샷 목록을 불러올 수 없습니다"},500)}});X.post("/api/screenshots/download-zip",async e=>{try{const{fileNames:t}=await e.req.json();if(!t||!Array.isArray(t)||t.length===0)return e.json({error:"다운로드할 파일 목록이 필요합니다"},400);const{env:r}=e;if(!r.SCREENSHOTS)return e.json({error:"R2 bucket이 설정되지 않았습니다"},500);const s={};for(const a of t)try{const i=await r.SCREENSHOTS.get(`screenshots/${a}`);if(i){const l=await i.arrayBuffer();s[a]=new Uint8Array(l)}}catch(i){console.error(`파일 가져오기 실패: ${a}`,i)}const n=Cs(s,{level:6});return new Response(n,{headers:{"Content-Type":"application/zip","Content-Disposition":`attachment; filename="screenshots-${Date.now()}.zip"`,"Cache-Control":"no-cache"}})}catch(t){return console.error("ZIP 생성 오류:",t),e.json({error:"ZIP 파일 생성 중 오류가 발생했습니다",details:t.message},500)}});const Ft=new cr,Ts=Object.assign({"/src/index.tsx":X});let wr=!1;for(const[,e]of Object.entries(Ts))e&&(Ft.all("*",t=>{let r;try{r=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,r)}),Ft.notFound(t=>{let r;try{r=t.executionCtx}catch{}return e.fetch(t.req.raw,t.env,r)}),wr=!0);if(!wr)throw new Error("Can't import modules from ['/src/index.ts','/src/index.tsx','/app/server.ts']");export{Ft as default};
+  `);
+});
+app.post("/api/screenshot", async (c) => {
+  try {
+    const { url, width = 1920, format = "png", fullPage = true } = await c.req.json();
+    if (!url) {
+      return c.json({ error: "URL이 필요합니다" }, 400);
+    }
+    const screenshotApiUrl = `https://api.microlink.io`;
+    const params = new URLSearchParams({
+      url,
+      screenshot: "true",
+      meta: "false",
+      viewport: JSON.stringify({ width, height: 1080 }),
+      fullPage: fullPage.toString(),
+      type: format
+    });
+    const response = await fetch(`${screenshotApiUrl}?${params.toString()}`);
+    if (!response.ok) {
+      throw new Error(`스크린샷 API 오류: ${response.status}`);
+    }
+    const jsonResponse = await response.json();
+    if (jsonResponse.status !== "success" || !jsonResponse.data?.screenshot?.url) {
+      throw new Error("스크린샷 URL을 가져올 수 없습니다");
+    }
+    const imageResponse = await fetch(jsonResponse.data.screenshot.url);
+    if (!imageResponse.ok) {
+      throw new Error("스크린샷 이미지를 다운로드할 수 없습니다");
+    }
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const fileName = `screenshots/${Date.now()}-${Math.random().toString(36).substring(7)}.${format}`;
+    const { env } = c;
+    if (env.SCREENSHOTS) {
+      await env.SCREENSHOTS.put(fileName, imageBuffer, {
+        httpMetadata: {
+          contentType: `image/${format}`
+        }
+      });
+    }
+    return c.json({
+      success: true,
+      url,
+      fileName,
+      size: imageBuffer.byteLength,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    console.error("스크린샷 생성 오류:", error);
+    return c.json({
+      error: "스크린샷 생성 중 오류가 발생했습니다",
+      details: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+});
+app.post("/api/analyze", async (c) => {
+  try {
+    const { url } = await c.req.json();
+    if (!url) {
+      return c.json({ error: "URL이 필요합니다" }, 400);
+    }
+    const baseUrl = new URL(url);
+    const baseDomain = baseUrl.origin;
+    const commonPaths = [
+      "/",
+      "/about",
+      "/contact",
+      "/faq",
+      "/login",
+      "/signup",
+      "/register",
+      "/settings",
+      "/profile",
+      "/dashboard",
+      // 학교/교육 관련
+      "/courses",
+      "/courses/major",
+      "/courses/general",
+      "/subjects",
+      "/schedule",
+      "/requirements",
+      "/requirements/master",
+      "/requirements/doctoral",
+      "/graduation",
+      "/thesis",
+      "/credits",
+      "/papers",
+      "/papers/international-conference",
+      "/papers/domestic-conference",
+      "/papers/international-journal",
+      "/papers/domestic-journal",
+      // 일반 사이트 패턴
+      "/products",
+      "/services",
+      "/pricing",
+      "/features",
+      "/blog",
+      "/news",
+      "/events",
+      "/gallery",
+      "/portfolio",
+      "/team",
+      "/careers",
+      "/support",
+      "/docs",
+      "/documentation",
+      "/api",
+      "/terms",
+      "/privacy",
+      "/sitemap"
+    ];
+    const foundUrls = [];
+    const checkPromises = [];
+    for (const path of commonPaths) {
+      const fullUrl = `${baseDomain}${path}`;
+      checkPromises.push(
+        fetch(fullUrl, {
+          method: "HEAD",
+          headers: { "User-Agent": "Mozilla/5.0" }
+        }).then((response) => {
+          if (response.ok) {
+            return fullUrl;
+          }
+          return null;
+        }).catch(() => null)
+      );
+    }
+    const results = await Promise.all(checkPromises);
+    for (const result of results) {
+      if (result) {
+        foundUrls.push(result);
+      }
+    }
+    const uniqueUrls = Array.from(new Set(foundUrls)).sort();
+    return c.json({
+      success: true,
+      baseUrl: url,
+      foundUrls: uniqueUrls,
+      count: uniqueUrls.length
+    });
+  } catch (error) {
+    console.error("사이트 분석 오류:", error);
+    return c.json({
+      error: "사이트 분석 중 오류가 발생했습니다",
+      details: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+});
+app.post("/api/crawl", async (c) => {
+  try {
+    const { url, maxPages = 20, maxDepth = 2 } = await c.req.json();
+    if (!url) {
+      return c.json({ error: "URL이 필요합니다" }, 400);
+    }
+    const baseUrl = new URL(url);
+    const baseDomain = baseUrl.hostname;
+    const visited = /* @__PURE__ */ new Set();
+    const toVisit = [{ url, depth: 0 }];
+    const foundUrls = [];
+    while (toVisit.length > 0 && foundUrls.length < maxPages) {
+      const current = toVisit.shift();
+      if (!current) break;
+      const currentUrl = current.url;
+      const currentDepth = current.depth;
+      if (visited.has(currentUrl) || currentDepth > maxDepth) {
+        continue;
+      }
+      visited.add(currentUrl);
+      foundUrls.push(currentUrl);
+      try {
+        const microlinkUrl = `https://api.microlink.io`;
+        const params = new URLSearchParams({
+          url: currentUrl,
+          meta: "false",
+          data: "links"
+        });
+        const response = await fetch(`${microlinkUrl}?${params.toString()}`);
+        if (response.ok) {
+          const jsonResponse = await response.json();
+          if (jsonResponse.status === "success" && jsonResponse.data?.links) {
+            const links = jsonResponse.data.links;
+            for (const link of links) {
+              try {
+                const linkUrl = link.href;
+                if (!linkUrl) continue;
+                const absoluteUrl = new URL(linkUrl, currentUrl).href;
+                const linkDomain = new URL(absoluteUrl).hostname;
+                if (linkDomain === baseDomain && !visited.has(absoluteUrl) && !toVisit.some((item) => item.url === absoluteUrl) && !absoluteUrl.includes("#") && // 앵커 링크 제외
+                !absoluteUrl.match(/\.(pdf|jpg|jpeg|png|gif|zip|rar|exe|dmg)$/i)) {
+                  toVisit.push({ url: absoluteUrl, depth: currentDepth + 1 });
+                }
+              } catch (e) {
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`크롤링 오류 (${currentUrl}):`, error);
+      }
+    }
+    return c.json({
+      success: true,
+      baseUrl: url,
+      foundUrls,
+      count: foundUrls.length,
+      maxPages,
+      maxDepth
+    });
+  } catch (error) {
+    console.error("크롤링 오류:", error);
+    return c.json({
+      error: "크롤링 중 오류가 발생했습니다",
+      details: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+});
+app.post("/api/screenshots/batch", async (c) => {
+  try {
+    const { urls, width = 1920, format = "png", fullPage = true } = await c.req.json();
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      return c.json({ error: "URL 목록이 필요합니다" }, 400);
+    }
+    const results = [];
+    for (const url of urls) {
+      try {
+        const screenshotApiUrl = `https://api.microlink.io`;
+        const params = new URLSearchParams({
+          url,
+          screenshot: "true",
+          meta: "false",
+          viewport: JSON.stringify({ width, height: 1080 }),
+          fullPage: fullPage.toString(),
+          type: format
+        });
+        const response = await fetch(`${screenshotApiUrl}?${params.toString()}`);
+        if (response.ok) {
+          const jsonResponse = await response.json();
+          if (jsonResponse.status === "success" && jsonResponse.data?.screenshot?.url) {
+            const imageResponse = await fetch(jsonResponse.data.screenshot.url);
+            const imageBuffer = await imageResponse.arrayBuffer();
+            const fileName = `screenshots/${Date.now()}-${Math.random().toString(36).substring(7)}.${format}`;
+            const { env } = c;
+            if (env.SCREENSHOTS) {
+              await env.SCREENSHOTS.put(fileName, imageBuffer, {
+                httpMetadata: {
+                  contentType: `image/${format}`
+                }
+              });
+            }
+            results.push({
+              success: true,
+              url,
+              fileName,
+              size: imageBuffer.byteLength
+            });
+          } else {
+            results.push({
+              success: false,
+              url,
+              error: "스크린샷 URL을 가져올 수 없습니다"
+            });
+          }
+        } else {
+          results.push({
+            success: false,
+            url,
+            error: `API 오류: ${response.status}`
+          });
+        }
+      } catch (error) {
+        results.push({
+          success: false,
+          url,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+    return c.json({
+      success: true,
+      total: urls.length,
+      succeeded: results.filter((r) => r.success).length,
+      failed: results.filter((r) => !r.success).length,
+      results
+    });
+  } catch (error) {
+    console.error("일괄 스크린샷 생성 오류:", error);
+    return c.json({
+      error: "일괄 스크린샷 생성 중 오류가 발생했습니다",
+      details: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+});
+app.get("/api/screenshot/:fileName", async (c) => {
+  try {
+    const fileName = c.req.param("fileName");
+    const { env } = c;
+    if (!env.SCREENSHOTS) {
+      return c.json({ error: "R2 bucket이 설정되지 않았습니다" }, 500);
+    }
+    const object = await env.SCREENSHOTS.get(`screenshots/${fileName}`);
+    if (!object) {
+      return c.notFound();
+    }
+    return new Response(object.body, {
+      headers: {
+        "Content-Type": object.httpMetadata?.contentType || "image/png",
+        "Cache-Control": "public, max-age=31536000"
+      }
+    });
+  } catch (error) {
+    console.error("스크린샷 조회 오류:", error);
+    return c.json({ error: "스크린샷을 불러올 수 없습니다" }, 500);
+  }
+});
+app.get("/api/screenshots", async (c) => {
+  try {
+    const { env } = c;
+    if (!env.SCREENSHOTS) {
+      return c.json({ error: "R2 bucket이 설정되지 않았습니다" }, 500);
+    }
+    const listed = await env.SCREENSHOTS.list({ prefix: "screenshots/" });
+    const screenshots = listed.objects.map((obj) => ({
+      key: obj.key,
+      fileName: obj.key.replace("screenshots/", ""),
+      size: obj.size,
+      uploaded: obj.uploaded
+    }));
+    return c.json({
+      success: true,
+      count: screenshots.length,
+      screenshots
+    });
+  } catch (error) {
+    console.error("스크린샷 목록 조회 오류:", error);
+    return c.json({ error: "스크린샷 목록을 불러올 수 없습니다" }, 500);
+  }
+});
+app.post("/api/screenshots/download-zip", async (c) => {
+  try {
+    const { fileNames } = await c.req.json();
+    if (!fileNames || !Array.isArray(fileNames) || fileNames.length === 0) {
+      return c.json({ error: "다운로드할 파일 목록이 필요합니다" }, 400);
+    }
+    const { env } = c;
+    if (!env.SCREENSHOTS) {
+      return c.json({ error: "R2 bucket이 설정되지 않았습니다" }, 500);
+    }
+    const files = {};
+    for (const fileName of fileNames) {
+      try {
+        const object = await env.SCREENSHOTS.get(`screenshots/${fileName}`);
+        if (object) {
+          const arrayBuffer = await object.arrayBuffer();
+          files[fileName] = new Uint8Array(arrayBuffer);
+        }
+      } catch (error) {
+        console.error(`파일 가져오기 실패: ${fileName}`, error);
+      }
+    }
+    const zipped = zipSync(files, { level: 6 });
+    return new Response(zipped, {
+      headers: {
+        "Content-Type": "application/zip",
+        "Content-Disposition": `attachment; filename="screenshots-${Date.now()}.zip"`,
+        "Cache-Control": "no-cache"
+      }
+    });
+  } catch (error) {
+    console.error("ZIP 생성 오류:", error);
+    return c.json({ error: "ZIP 파일 생성 중 오류가 발생했습니다", details: error.message }, 500);
+  }
+});
+
+export { app as default };

@@ -243,7 +243,9 @@ function addResultCard(result) {
     card.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-200';
     
     if (result.success) {
-        const downloadUrl = `/api/screenshot/${result.fileName.split('/').pop()}`;
+        const fileName = result.fileName.split('/').pop();
+        // 캐시 버스팅을 위한 타임스탬프 추가
+        const downloadUrl = `/api/screenshot/${fileName}?t=${Date.now()}`;
         card.innerHTML = `
             <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4">
                 <div class="flex items-center justify-between mb-2">
@@ -251,12 +253,16 @@ function addResultCard(result) {
                     <span class="text-xs text-gray-500">${(result.size / 1024).toFixed(2)} KB</span>
                 </div>
                 <div class="bg-white rounded p-2 mb-3">
-                    <img src="${downloadUrl}" alt="스크린샷" class="w-full h-32 object-cover object-top rounded" loading="lazy">
+                    <img src="${downloadUrl}" 
+                         alt="스크린샷" 
+                         class="w-full h-32 object-cover object-top rounded" 
+                         loading="lazy"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22128%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22200%22 height=%22128%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2214%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3E이미지 로딩 실패%3C/text%3E%3C/svg%3E'">
                 </div>
                 <p class="text-xs text-gray-600 mb-3 truncate" title="${result.url}">
                     <i class="fas fa-link mr-1"></i>${result.url}
                 </p>
-                <a href="${downloadUrl}" download class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-2 rounded text-sm font-semibold transition">
+                <a href="${downloadUrl}" download="${fileName}" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-2 rounded text-sm font-semibold transition">
                     <i class="fas fa-download mr-2"></i>다운로드
                 </a>
             </div>
@@ -509,6 +515,55 @@ function downloadAll() {
         link.download = `screenshot-${result.fileName.split('/').pop()}`;
         link.click();
     });
+}
+
+// 전체 초기화 함수
+function resetAll() {
+    if (isProcessing) {
+        alert('처리 중에는 초기화할 수 없습니다.');
+        return;
+    }
+    
+    if (!confirm('모든 입력과 결과를 초기화하시겠습니까?')) {
+        return;
+    }
+    
+    // 전역 상태 초기화
+    isProcessing = false;
+    currentResults = [];
+    foundUrlsCache = [];
+    
+    // URL 입력 초기화
+    document.getElementById('urlInput').value = '';
+    document.getElementById('analyzeUrl').value = '';
+    
+    // 옵션 초기화
+    document.getElementById('widthSelect').value = '1920';
+    document.getElementById('formatSelect').value = 'png';
+    document.getElementById('fullPageSelect').value = 'true';
+    document.querySelector('input[name="crawlMode"][value="manual"]').checked = true;
+    document.getElementById('crawlOptions').classList.add('hidden');
+    
+    // UI 초기화
+    document.getElementById('progressSection').classList.add('hidden');
+    document.getElementById('resultsSection').classList.add('hidden');
+    document.getElementById('analyzeResult').classList.add('hidden');
+    
+    document.getElementById('logContainer').innerHTML = '<div class="text-gray-500">로그가 여기에 표시됩니다...</div>';
+    document.getElementById('resultsGrid').innerHTML = '';
+    document.getElementById('foundUrlList').innerHTML = '';
+    document.getElementById('foundUrlCount').textContent = '0';
+    
+    // 버튼 상태 복원
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('startBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+    
+    addLog('✅ 초기화 완료', 'success');
+    
+    // 1초 후 로그도 초기화
+    setTimeout(() => {
+        document.getElementById('logContainer').innerHTML = '<div class="text-gray-500">로그가 여기에 표시됩니다...</div>';
+    }, 1000);
 }
 
 // Enter 키로 실행
