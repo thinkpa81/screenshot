@@ -1,6 +1,5 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { serveStatic } from 'hono/cloudflare-workers'
 import { zipSync } from 'fflate'
 
 type Bindings = {
@@ -11,9 +10,6 @@ const app = new Hono<{ Bindings: Bindings }>()
 
 // CORS 설정
 app.use('/api/*', cors())
-
-// 정적 파일 서빙
-app.use('/static/*', serveStatic({ root: './public' }))
 
 // 메인 페이지
 app.get('/', (c) => {
@@ -374,89 +370,59 @@ app.post('/api/analyze', async (c) => {
     const baseUrl = new URL(url)
     const baseDomain = baseUrl.origin
     
-    // 일반적인 웹사이트 경로 패턴
-    const commonPaths = [
-      '/',
-      '/about',
-      '/contact',
-      '/faq',
-      '/login',
-      '/signup',
-      '/register',
-      '/settings',
-      '/profile',
-      '/dashboard',
-      // 학교/교육 관련
-      '/courses',
-      '/courses/major',
-      '/courses/general',
-      '/subjects',
-      '/schedule',
-      '/requirements',
-      '/requirements/master',
-      '/requirements/doctoral',
-      '/graduation',
-      '/thesis',
-      '/credits',
-      '/papers',
-      '/papers/international-conference',
-      '/papers/domestic-conference',
-      '/papers/international-journal',
-      '/papers/domestic-journal',
-      // 일반 사이트 패턴
-      '/products',
-      '/services',
-      '/pricing',
-      '/features',
-      '/blog',
-      '/news',
-      '/events',
-      '/gallery',
-      '/portfolio',
-      '/team',
-      '/careers',
-      '/support',
-      '/docs',
-      '/documentation',
-      '/api',
-      '/terms',
-      '/privacy',
-      '/sitemap'
-    ]
-
-    const foundUrls: string[] = []
-    const checkPromises = []
-
-    // 모든 경로를 병렬로 체크
-    for (const path of commonPaths) {
-      const fullUrl = `${baseDomain}${path}`
-      
-      checkPromises.push(
-        fetch(fullUrl, { 
-          method: 'HEAD',
-          headers: { 'User-Agent': 'Mozilla/5.0' }
-        })
-          .then(response => {
-            if (response.ok) {
-              return fullUrl
-            }
-            return null
-          })
-          .catch(() => null)
-      )
-    }
-
-    const results = await Promise.all(checkPromises)
+    const foundUrls = new Set<string>()
+    foundUrls.add(url) // 기본 URL 추가
     
-    // null이 아닌 결과만 필터링
-    for (const result of results) {
-      if (result) {
-        foundUrls.push(result)
+    try {
+      // 실제 HTML을 가져와서 링크 추출
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      })
+      
+      if (response.ok) {
+        const html = await response.text()
+        
+        // href 속성에서 링크 추출
+        const hrefRegex = /href=["']([^"']+)["']/gi
+        let match
+        
+        while ((match = hrefRegex.exec(html)) !== null) {
+          const href = match[1]
+          
+          // 유효한 링크인지 확인
+          if (href && 
+              !href.startsWith('#') && 
+              !href.startsWith('javascript:') && 
+              !href.startsWith('mailto:') &&
+              !href.startsWith('tel:') &&
+              !href.match(/\.(pdf|jpg|jpeg|png|gif|zip|rar|exe|dmg|css|js)(\?|$)/i)) {
+            
+            try {
+              // 상대 경로를 절대 경로로 변환
+              const absoluteUrl = new URL(href, url).href
+              const linkDomain = new URL(absoluteUrl).origin
+              
+              // 같은 도메인인 경우만 추가
+              if (linkDomain === baseDomain) {
+                // 쿼리 파라미터 제거
+                const cleanUrl = absoluteUrl.split('?')[0].split('#')[0]
+                foundUrls.add(cleanUrl)
+              }
+            } catch (e) {
+              // URL 파싱 오류 무시
+            }
+          }
+        }
       }
+    } catch (error) {
+      console.error('HTML 파싱 오류:', error)
+      // 에러가 발생해도 기본 URL은 반환
     }
 
     // 중복 제거 및 정렬
-    const uniqueUrls = Array.from(new Set(foundUrls)).sort()
+    const uniqueUrls = Array.from(foundUrls).sort()
 
     return c.json({
       success: true,

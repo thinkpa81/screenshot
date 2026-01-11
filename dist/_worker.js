@@ -1,11 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { serveStatic } from 'hono/cloudflare-workers';
 import { zipSync } from 'fflate';
 
 const app = new Hono();
 app.use("/api/*", cors());
-app.use("/static/*", serveStatic({ root: "./public" }));
 app.get("/", (c) => {
   return c.html(`
     <!DOCTYPE html>
@@ -338,77 +336,37 @@ app.post("/api/analyze", async (c) => {
     }
     const baseUrl = new URL(url);
     const baseDomain = baseUrl.origin;
-    const commonPaths = [
-      "/",
-      "/about",
-      "/contact",
-      "/faq",
-      "/login",
-      "/signup",
-      "/register",
-      "/settings",
-      "/profile",
-      "/dashboard",
-      // 학교/교육 관련
-      "/courses",
-      "/courses/major",
-      "/courses/general",
-      "/subjects",
-      "/schedule",
-      "/requirements",
-      "/requirements/master",
-      "/requirements/doctoral",
-      "/graduation",
-      "/thesis",
-      "/credits",
-      "/papers",
-      "/papers/international-conference",
-      "/papers/domestic-conference",
-      "/papers/international-journal",
-      "/papers/domestic-journal",
-      // 일반 사이트 패턴
-      "/products",
-      "/services",
-      "/pricing",
-      "/features",
-      "/blog",
-      "/news",
-      "/events",
-      "/gallery",
-      "/portfolio",
-      "/team",
-      "/careers",
-      "/support",
-      "/docs",
-      "/documentation",
-      "/api",
-      "/terms",
-      "/privacy",
-      "/sitemap"
-    ];
-    const foundUrls = [];
-    const checkPromises = [];
-    for (const path of commonPaths) {
-      const fullUrl = `${baseDomain}${path}`;
-      checkPromises.push(
-        fetch(fullUrl, {
-          method: "HEAD",
-          headers: { "User-Agent": "Mozilla/5.0" }
-        }).then((response) => {
-          if (response.ok) {
-            return fullUrl;
+    const foundUrls = /* @__PURE__ */ new Set();
+    foundUrls.add(url);
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        }
+      });
+      if (response.ok) {
+        const html = await response.text();
+        const hrefRegex = /href=["']([^"']+)["']/gi;
+        let match;
+        while ((match = hrefRegex.exec(html)) !== null) {
+          const href = match[1];
+          if (href && !href.startsWith("#") && !href.startsWith("javascript:") && !href.startsWith("mailto:") && !href.startsWith("tel:") && !href.match(/\.(pdf|jpg|jpeg|png|gif|zip|rar|exe|dmg|css|js)(\?|$)/i)) {
+            try {
+              const absoluteUrl = new URL(href, url).href;
+              const linkDomain = new URL(absoluteUrl).origin;
+              if (linkDomain === baseDomain) {
+                const cleanUrl = absoluteUrl.split("?")[0].split("#")[0];
+                foundUrls.add(cleanUrl);
+              }
+            } catch (e) {
+            }
           }
-          return null;
-        }).catch(() => null)
-      );
-    }
-    const results = await Promise.all(checkPromises);
-    for (const result of results) {
-      if (result) {
-        foundUrls.push(result);
+        }
       }
+    } catch (error) {
+      console.error("HTML 파싱 오류:", error);
     }
-    const uniqueUrls = Array.from(new Set(foundUrls)).sort();
+    const uniqueUrls = Array.from(foundUrls).sort();
     return c.json({
       success: true,
       baseUrl: url,
